@@ -1,0 +1,16 @@
+1.
+
+2.
+
+3.
+The cube is squished completely flat and curls up on itself.
+This is because only connecting to the 6 cardinal neighbors is not a stable setup.
+It didn't happen when not rotated because in this perfect environment the gravity is aligned with the up and down forces and so only they are actually in effect.
+
+4.
+it stabilizes the simulation so it works almost like a real box of jello.
+Speed should be decreased, but I don't really see much difference.
+
+5.
+Less "wobbling"
+Larger time steps are indeed possible

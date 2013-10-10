@@ -1,0 +1,310 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 512.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/D/Home/Dropbox/UNI/4.år/4.kvarter/skema.php.htm",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/minRenderingsalgoritmer/miro/Scene.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/minRenderingsalgoritmer/assignment3/hand-in/web page/rendering_algorithms_2013.html",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 1/lib/binarysearch.h",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/pivot_strategies/RandomPivot.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/pivot_strategies/LowPivot.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/pivot_strategies/PivotStrategy.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/Quicksort.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/TODO.txt",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/Library.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/src/benchmarker/Benchmarker.java",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/minRenderingsalgoritmer/smallppm_verbosed.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/minRenderingsalgoritmer/miro/Ray.h",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/pivot_strategies/SkewedPivot.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/hand-in/Part 2/src/batches/batch1/pivot_strategies/MedianPivot.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_16-53-46/Configuration.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_15-58-05/Configuration.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_16-53-46/Benchmarker.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_14-54-51/Benchmarker.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_14-54-51/Configuration.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-27_15-33-42/Configuration.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-27_15-33-42/Benchmarker.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/2 with warmup/compile_plots.gp",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/graphs/Step5/compile_plots.gp",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/graphs/Step1/compile_plots.gp",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_16-53-46/data/batches.batch4.batches.batch4.SimpleThreadedDualPivotQuickSort.RandomPivot.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/graphs/Step1/compile_plots (mads frandsen's conflicted copy 2013-04-03).gp",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_15-58-05/data/batches.batch4.batches.batch4.ThreadedDualPivotQuickSort.HighLowPivot.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_15-58-05/data/batches.batch4.batches.batch4.ThreadedDualPivotQuickSort.RandomPivot.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-04-02_11-51-16/data/compile_plots.gp",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-04-02_10-42-01/Benchmarker.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/src/batches/batch0/InsertionSort.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/without warmup and recompiled/batches.batch0.JavaQuicksort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/with warmup/batches.batch0.JavaQuicksort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/with warmup/batches.batch0.QuickSort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/without warmup and recompiled/batches.batch0.QuickSort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/batches.batch0.NaiveQuicksort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/batches.batch0.JavaQuicksort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/Windows/batches.batch0.QuickSort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_14-54-51/data/batches.batch0.NaiveQuicksort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_14-54-51/data/batches.batch0.QuickSort.data",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/src/batches/batch0/NaiveQuicksort.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/src/batches/batch0/JavaQuicksort.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/QuicksortProject/src/batches/batch0/Library.java",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_12-38-16/Benchmarker.java",
+		"/D/Home/Dropbox/mobile crash reboot.rtf",
+		"/D/Home/Dropbox/AlgEng_share/Proj 3/JanData/2013-03-28_12-38-16/Configuration.java",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/PhotonMap.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/Triangle.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/Scene.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/assignment3.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/Plane.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/RendAlgProjekt (for reference)/TriangleMesh.cpp",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/benchmarker/Benchmarker.java",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/benchmarker/Configuration.java",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/benchmarker/SortAlgorithm.java",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/benchmarker/NullQuicksort.java",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/batches/batch0/QuickSortWithPivot.java",
+		"/D/Home/Dropbox/AlgEng_share/Rapport/spørgsmål fra jan.txt",
+		"/D/Home/Dropbox/AlgEng_share/Java/QuicksortProject/src/utils/ArrayGenerator.java",
+		"/D/Home/Dropbox/AlgEng_share/Rapport/mads_comments.tmp",
+		"/D/Home/Dropbox/AlgEng_share/Rapport/AlgEng.bib",
+		"/D/Home/Dropbox/AlgEng_share/Rapport/Project1.bbl",
+		"/D/Home/Dropbox/AlgEng_share/benchmarking/gnuplots/complot_bcm.gp",
+		"/D/Home/Dropbox/AlgEng_share/Rapport/Project1.bibtex",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/minRenderingsalgoritmer/smallppm.cpp",
+		"/C/Users/Jan/AppData/Local/Temp/smallppm.cpp",
+		"/C/Users/Jan/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/Jan/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/D/Games/Steam/steamapps/common/skyrim/enbseries.ini",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/Application.cpp",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/CombineShaderFS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/miro/BVH.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/miro/Triangle.cpp",
+		"/D/Games/Steam/userdata/79516415/43110/remote/user.cfg",
+		"/C/Users/Jan/AppData/Local/4A Games/Metro 2033/user.cfg",
+		"/C/Users/Jan/Documents/my games/skyrim/SkyrimPrefs.ini",
+		"/D/Games/Steam/steamapps/common/skyrim/enbeffect.fx",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/DeferredLightingFS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/assignment1.cpp",
+		"/D/Home/Dropbox/UNI/4.år/3.kvarter/Renderingsalgoritmer/miro/README.txt",
+		"/D/Games/Steam/steamapps/sourcemods/BMS/cfg/chapter2.cfg",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/CombineShaderVS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/DeferredLightingVS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/GbufferShaderFS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/GbufferShaderVS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week7Exercise/Source/DisplacementTCS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week7Exercise/Source/DisplacementTES.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week7Exercise/Source/PNTriangleTES.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week6Exercise/Source/Application.cpp",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week6Exercise/Source/EmptySpaceSkipGS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Exam/Week6Exercise/Source/EmptySpaceSkipVS.glsl",
+		"/C/Users/Jan/AppData/Roaming/Mozilla/Firefox/Profiles/flvxell4.default/extensions/crossriderapp14917@crossrider.com/chrome/content/crossrider.js",
+		"/C/Users/Jan/AppData/Roaming/Mozilla/Firefox/Profiles/flvxell4.default/extensions/crossriderapp14917@crossrider.com/chrome.manifest",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Week4/Source/GBufferFS.glsl",
+		"/D/Home/Dropbox/UNI/4.år/2.kvarter/ARGE/Week4/Source/Application.cpp",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 4 - Anti-aliasing/Week4/Source/Application.cpp",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 4 - Anti-aliasing/Week4/Source/SRAAFS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 4 - Anti-aliasing/Week4/Source/BlendWeightsFS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 4 - Anti-aliasing/Week4/Source/NeighbourhoodBlendingFS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/ParticleLightFS.glsl",
+		"/D/Home/Dropbox/ARGE/ARGE - Documents/Handins/Week 3 - Deferred Rendering/Week3/Source/ParticleLightVS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/CombineShaderFS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/FS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/ParticleLightFS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/ParticleLightVS.glsl",
+		"/D/Games/Steam/steamapps/common/skyrim/mods/Piercing and cuff pack for Skyrim -11292-1/mmpieceringparts1.esp",
+		"/D/Home/Dropbox/UNI/1.år/2.kvarter/dProg2/uge47-48/FactorGUI/FactorGUI.java",
+		"/D/Games/Steam/steamapps/common/skyrim/shader.fx",
+		"/D/Home/Dropbox/UNI/1.år/2.kvarter/dProg2/NetBeansTest1/src/netbeanstest1/Main.java",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_AIP_handin1.zip/Exercise 4/exercise4.py",
+		"/D/Home/Dropbox/UNI/1.år/2.kvarter/dProg2/uge48-49/Binomial/Binomial.java",
+		"/D/Home/Dropbox/UNI/1.år/2.kvarter/dProg2/uge47-48/opgave12/opgave12.java",
+		"/D/Home/Dropbox/ARGE/AIP/Exercise 3/exercise3.py",
+		"/D/Home/Dropbox/ARGE/AIP/Exercise 4/exercise4.py",
+		"/D/games/steam/steamapps/common/skyrim/enbseries.ini",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/GbufferShaderVS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/GbufferShaderFS.glsl",
+		"/C/Users/Jan/AppData/Local/Temp/Temp1_Week3.zip/Week3/Source/Application.cpp",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Final Hand In/IP Part/TextureSynthesis.cpp",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Uge6/DFT.cpp",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Compulsory Assignment CG Part/scenegraph/scenegraph.c",
+		"/C/Users/Jan/AppData/Local/Temp/Erasmus-aftaler.xlsx",
+		"/C/Users/Jan/Documents/Guild Wars 2/Local.dat",
+		"/C/Users/Jan/Desktop/compulsoryassignment.c",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Compulsory Assignment CG Part/compulsoryassignment.c",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Uge4/ICGIP_Lecture1_example1.cpp",
+		"/D/Home/Dropbox/UNI/4.år/1.kvarter/ICGIP/Compulsory Assignment IP Part/Code/TextureSynthesis.cpp"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			"D:\\Home\\Dropbox\\UNI\\4.år\\3.kvarter\\Renderingsalgoritmer\\RendAlgProjekt (for reference)"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"23",
+			"70",
+			"←",
+			"bssrdf",
+			"scatter",
+			"m_uiObjVAO",
+			"DeferredLighting",
+			"Create",
+			"m_uiObjVAO",
+			"m_uiGbufferProgram",
+			"RenderGbuffer",
+			"m_uiGbufferProgram",
+			"m_kSphereVertices",
+			"DeferredLighting()",
+			"Application::DeferredLighting",
+			"DeferredLighting",
+			"m_uiDeferredLightingProgram",
+			"aa",
+			"fxaa",
+			"afSRAAShadingOffset",
+			"fov",
+			"m_uiGbufferProgram",
+			"SSAO",
+			"HD6_COLORSAT_DA",
+			"AmbientLightingCurve",
+			"linked",
+			"pipelineProgram",
+			"lightPos",
+			"setLight0",
+			"view",
+			"fov",
+			"-3"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"<-"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"ray",
+				"Ray.h"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 82.0,
+	"status_bar_visible": true
+}

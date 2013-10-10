@@ -1,0 +1,10 @@
+void makeTeapotScene();
+void makeDragonSmoothScene();
+void makeBunny1Scene();
+void makeBunny20Scene();
+void makeSponzaScene();
+void makeSphereScene();
+void makeSphereSmoothScene();
+void makeTeapotHiResScene();
+void makeCubeScene();
+void makeSmallLightScene();

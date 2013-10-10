@@ -11,3 +11,15 @@
 *.lai
 *.la
 *.a
+
+# miro specific
+*.ppm
+*.png
+
+# CMAKE
+*/build/*
+*/bin/*
+bin/*
+
+# Gedit
+*~
