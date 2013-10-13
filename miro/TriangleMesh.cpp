@@ -27,14 +27,15 @@ TriangleMesh::~TriangleMesh()
 }
 
 // HashGrid* 
-// HitInfo*
-std::vector<HitInfo*>
+HitInfo*
+// std::vector<HitInfo>
 TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, float hitPointRadius) {
 	int hashSize = m_numTris;
 	hg->initializeGrid(minCorner, maxCorner, hashSize, hitPointRadius);
 
 	// HitInfo* mpArray[m_numTris];
-	std::vector<HitInfo*> mpVector;
+	// std::vector<HitInfo> mpVector;
+	HitInfo* mpArray[m_numTris*m_mpPerTri];
 	// mpVector.resize(m_numTris);
 
 	for(int i=0; i<m_numTris; i++) {
@@ -58,7 +59,7 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			float random = RAND;
 			if(random > m_prop) continue;
 
-			HitInfo* mp = new HitInfo();
+			HitInfo mp = HitInfo();
 
 			float R = RAND;
 			float S = RAND;
@@ -108,19 +109,21 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			// Vector3 normal = (norms[0] + norms[1] + norms[2]).normalize();
 			
 		
-			mp->r2 = hitPointRadius*hitPointRadius;
+			mp.r2 = hitPointRadius*hitPointRadius;
 			// mp->r2 = (Area/PI) * hitPointRadius*hitPointRadius; //using hitpoint radius as a scaling factor instead and set radius based on triangle size.
 			// mp->P = middlePoint;
-			mp->P = randomPoint;
-			mp->N = normal;
+			mp.P = randomPoint;
+			mp.N = normal;
 			// mp->A = Area;
-			mpVector.push_back(mp);
-			hg->addHitPoint(mp);
+			mpArray[i*j] = mp;
+			// mpVector.push_back(mp);
+			hg->addHitPoint(&mp);
 		}
 	}
 	std::cout << "Number of scatter samples:      " << mpVector.size() << "\n";
 	// return hg;
-	return mpVector;
+	// return mpVector;
+	return mpArray;
 }
 
 /*

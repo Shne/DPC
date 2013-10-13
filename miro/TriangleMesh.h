@@ -39,6 +39,7 @@ public:
     TupleI3* vIndices()     {return m_vertexIndices;}
     TupleI3* nIndices()     {return m_normalIndices;}
     int numTris()           {return m_numTris;}
+    int mpPerTri()          {return m_mpPerTri;}
 
     void setMpPerTri(unsigned int n) {m_mpPerTri = n;}
     void setProp(float p) {m_prop = p;}
@@ -49,7 +50,8 @@ public:
 
     // HashGrid* calculateEvenlyDistributedMPs(Vector3 minCorner, Vector3 maxCorner, int noOfMPs);
     // HashGrid* 
-    std::vector<HitInfo*> calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, float hitPointRadius);
+    // std::vector<HitInfo>
+    HitInfo* calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, float hitPointRadius);
 
 protected:
     void loadObj(FILE* fp, const Matrix4x4& ctm);

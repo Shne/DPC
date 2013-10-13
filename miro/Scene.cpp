@@ -17,7 +17,8 @@
 #include "SpecularRefraction.h"
 #include "GlossyHighlights.h"
 
-#include "kernel.h"
+// #include "kernel.h"
+#include "FinalPassKernel.h"
 
 using namespace std;
 
@@ -113,22 +114,22 @@ Scene::srgbEncode(float c) {
 
 void
 Scene::photonmapImage(Camera *cam, Image *img) {
-	uint w = img->width();
-	uint h = img->height();
-	float* result = kernel(w, h, NULL);
+	// uint w = img->width();
+	// uint h = img->height();
+	// float* result = kernel(w, h, NULL);
 
-	cout << "kernel done" << endl;
+	// cout << "kernel done" << endl;
 
-	for(int j = 0; j < h; ++j) {
-		for(int i = 0; i < w; ++i) {
-			// cout << "HURR" << endl;
-			// cout << result[i*w+j] << endl;
-			img->setPixel(i, j, Vector3(result[i*w+j]));
-		}
-		img->drawScanline(j);
-		glFinish();
-	}
-	return;
+	// for(int j = 0; j < h; ++j) {
+	// 	for(int i = 0; i < w; ++i) {
+	// 		// cout << "HURR" << endl;
+	// 		// cout << result[i*w+j] << endl;
+	// 		img->setPixel(i, j, Vector3(result[i*w+j]));
+	// 	}
+	// 	img->drawScanline(j);
+	// 	glFinish();
+	// }
+	// return;
 
 
 	/***************************
@@ -150,24 +151,26 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	// EYE PASS, for all pixels
 	clock.start();
 
-	HitInfo* measureHIArray[imgSize];
+	HitInfo measureHIArray[imgSize];
 
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
 			Ray* rays = cam->eyeRays(i, j, img->width(), img->height());
 			totalRays++;
-			HitInfo* hitInfo = new HitInfo;
-			hitInfo->ray = rays[0];
-			hitInfo->r2 = initialHitPointRadius*initialHitPointRadius;
-			hitInfo->pixel_index = j*img->width() + i;
-			bool hit = trace((*hitInfo), rays[0]);
+			HitInfo hitInfo = HitInfo();
+			hitInfo.ray = rays[0];
+			hitInfo.r2 = initialHitPointRadius*initialHitPointRadius;
+			hitInfo.pixel_index = j*img->width() + i;
+			bool hit = trace(hitInfo, rays[0]);
 
-			if(hit || hasEnvMap()) {
-				measureHIArray[j*img->width() + i] = hitInfo;
-				eye_mp_hg.addHitPoint(hitInfo);
-			} else {
-				measureHIArray[j*img->width() + i] = NULL;
-			}
+			// if(hit || hasEnvMap()) {
+			// 	measureHIArray[j*img->width() + i] = hitInfo;
+			// 	eye_mp_hg.addHitPoint(hitInfo);
+			// } else {
+			// 	measureHIArray[j*img->width() + i] = NULL;
+			// }
+			measureHIArray[j*img->width() + i] = hitInfo;
+			if(hit) eye_mp_hg.addHitPoint(hitInfo);
 		}
 	}
 	std::cout << "Eye pass done!                  " << clock.stop() << "\n";
@@ -176,9 +179,10 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 	// OBJECT PASS, distributing more irradiance samples across translucent objects
 	// to be used in calculating the BSSRDF in the final pass.
-	HashGrid* scatteringMPs_hg;
-	// HitInfo* 
-	std::vector<HitInfo*> scatteringMPs;
+	HashGrid scatteringMPs_hg;
+	HitInfo* scatteringMPs;
+	int scatteringMPsSize;
+	// std::vector<HitInfo> scatteringMPs;
 
 	// for each trianglemesh
 	for(std::list<TriangleMesh*>::iterator tMeshIter=m_triangleMeshes.begin(); tMeshIter!=m_triangleMeshes.end(); ++tMeshIter) {
@@ -188,8 +192,9 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 		// have it generate an even distribution of measurement points and put it in the hashgrid
 		// HashGrid* scatteringMPs_hg = tMesh->calculateEvenlyDistributedMPs(m_bvh.corners[0], m_bvh.corners[1], 1024);
-		scatteringMPs_hg = new HashGrid();
+		scatteringMPs_hg = HashGrid();
 		scatteringMPs = tMesh->calculateMPs(m_bvh.corners[0], m_bvh.corners[1], scatteringMPs_hg, scatterHitpointRadius);
+		scatteringMPsSize = tMesh->mpPerTri() * tMesh->numTris();
 		//	add the hashgrid to a vector of hashgrids, including the eye_mp_hg
 		// m_hashGrids.push_back(scatteringMPs_hg);
 	}
@@ -237,7 +242,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 					}
 				}
 
-				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg->lookup(photonHI.P);
+				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
 				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); ++sHiIter) {
 					HitInfo* scatteringHI = (*sHiIter);
 					if(scatteringHI == 0) continue;
@@ -256,6 +261,39 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 		}
 	}
 	std::cout << "Photon pass done!               " << clock.stop() << "\n";
+
+
+	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	
+
+
+
+
+
+	// SHADING
+	Vector3 pixelColor;
+	Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
+	
+	Vector3 shadeResult = hi->material->shade(hi->ray, (*hi), *this, 0);
+	pixelColor = shadeResult + marbleWhite * hi->flux * (1.0/(photonsPerLight));
+	
+	if(cam->exposure() != 0.0) {
+		pixelColor = expose(pixelColor, cam->exposure()); //tone mapping
+		gammaCorrect(pixelColor);
+	}
+
+	img->setPixel(i, j, pixelColor);
+
+
+	return;
+
+
+
+
+
+
+
+
 
 
 
@@ -282,7 +320,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	#pragma omp parallel for num_threads(4) schedule(dynamic, 10)
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
-			HitInfo* hi = eq[j*img->width() + i];
+			HitInfo* hi = measureHIArray[j*img->width() + i];
 			if(hi == NULL) continue;
 
 			/*
@@ -460,6 +498,7 @@ Scene::trace(HitInfo& minHit, const Ray& ray, float tMin, float tMax, int depth)
 	if(m_envMapMaterial != 0) {
 		minHit.material = m_envMapMaterial;
 	}
+	minHit.t = 0.0f;
 	return false;
 }
 
