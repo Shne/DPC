@@ -151,7 +151,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	// EYE PASS, for all pixels
 	clock.start();
 
-	HitInfo measureHIArray[imgSize];
+	HitInfo* measureHIArray = new HitInfo[imgSize];
 
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
@@ -170,7 +170,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			// 	measureHIArray[j*img->width() + i] = NULL;
 			// }
 			measureHIArray[j*img->width() + i] = hitInfo;
-			if(hit) eye_mp_hg.addHitPoint(hitInfo);
+			if(hit) eye_mp_hg.addHitPoint(&hitInfo);
 		}
 	}
 	std::cout << "Eye pass done!                  " << clock.stop() << "\n";
@@ -193,7 +193,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 		// have it generate an even distribution of measurement points and put it in the hashgrid
 		// HashGrid* scatteringMPs_hg = tMesh->calculateEvenlyDistributedMPs(m_bvh.corners[0], m_bvh.corners[1], 1024);
 		scatteringMPs_hg = HashGrid();
-		scatteringMPs = tMesh->calculateMPs(m_bvh.corners[0], m_bvh.corners[1], scatteringMPs_hg, scatterHitpointRadius);
+		scatteringMPs = tMesh->calculateMPs(m_bvh.corners[0], m_bvh.corners[1], &scatteringMPs_hg, scatterHitpointRadius);
 		scatteringMPsSize = tMesh->mpPerTri() * tMesh->numTris();
 		//	add the hashgrid to a vector of hashgrids, including the eye_mp_hg
 		// m_hashGrids.push_back(scatteringMPs_hg);
@@ -263,29 +263,43 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	std::cout << "Photon pass done!               " << clock.stop() << "\n";
 
 
-	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+
+
+
+
+
+
+
+
+
+
+	clock.start();
+	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
 	
+	std::cout << "kernel call done!             " << clock.stop() << "\n";
+	clock.start()
 
 
+	for (int j = 0; j < img->height(); ++j) {
+		for (int i = 0; i < img->width(); ++i) {
+			HitInfo hi = measureHIArray[j*img->width() + i];
 
+			// SHADING
+			Vector3 pixelColor;
+			Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
+			
+			Vector3 shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
+			pixelColor = shadeResult + marbleWhite * hi.flux * (1.0/(photonsPerLight));
+			
+			if(cam->exposure() != 0.0) {
+				pixelColor = expose(pixelColor, cam->exposure()); //tone mapping
+				gammaCorrect(pixelColor);
+			}
 
-
-	// SHADING
-	Vector3 pixelColor;
-	Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
-	
-	Vector3 shadeResult = hi->material->shade(hi->ray, (*hi), *this, 0);
-	pixelColor = shadeResult + marbleWhite * hi->flux * (1.0/(photonsPerLight));
-	
-	if(cam->exposure() != 0.0) {
-		pixelColor = expose(pixelColor, cam->exposure()); //tone mapping
-		gammaCorrect(pixelColor);
+			img->setPixel(i, j, pixelColor);
+		}
 	}
-
-	img->setPixel(i, j, pixelColor);
-
-
-	return;
+	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
 
 
@@ -295,6 +309,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 
+/*
 
 
 
@@ -320,36 +335,37 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	#pragma omp parallel for num_threads(4) schedule(dynamic, 10)
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
-			HitInfo* hi = measureHIArray[j*img->width() + i];
-			if(hi == NULL) continue;
+			HitInfo hi = measureHIArray[j*img->width() + i];
+			// if(hi == NULL) continue;
+			if(hi.t == 0.0f) continue;
 
-			/*
-			// SINGLE SCATTER
-			float so = RAND/sigmaT;
-			const float cosI = dot(hi->N, hi->ray.d);
-			const float sinT2 = my * my * (1.0 - cosI * cosI);
-			Vector3 refractedRay = my * hi->ray.d - (my + sqrt(1.0 - sinT2)) * hi->N;
-			Vector3 samplePoint = hi->P + so * refractedRay;
+			
+			// // SINGLE SCATTER
+			// float so = RAND/sigmaT;
+			// const float cosI = dot(hi->N, hi->ray.d);
+			// const float sinT2 = my * my * (1.0 - cosI * cosI);
+			// Vector3 refractedRay = my * hi->ray.d - (my + sqrt(1.0 - sinT2)) * hi->N;
+			// Vector3 samplePoint = hi->P + so * refractedRay;
 
-			Vector3 irradiance = Vector3(0.0);
-			std::vector<HitInfo*> sampleHiList = scatteringMPs_hg->lookup(samplePoint);
-			for(auto sHiIter = sampleHiList.begin(); sHiIter != sampleHiList.end(); ++sHiIter) {
-				HitInfo* sHI = (*sHiIter);
-				irradiance += sHI->flux * sHI->r2;
-			}
-			// float siprime = 
+			// Vector3 irradiance = Vector3(0.0);
+			// std::vector<HitInfo*> sampleHiList = scatteringMPs_hg->lookup(samplePoint);
+			// for(auto sHiIter = sampleHiList.begin(); sHiIter != sampleHiList.end(); ++sHiIter) {
+			// 	HitInfo* sHI = (*sHiIter);
+			// 	irradiance += sHI->flux * sHI->r2;
+			// }
+			// // float siprime = 
 
-			// Vector3 radiance = sigmaS * pow(E,-)
-			// hi->flux += 
-			*/
+			// // Vector3 radiance = sigmaS * pow(E,-)
+			// // hi->flux += 
+			
 
 
 			// MULTIPLE SCATTER
-			int scatteringMPsSize = scatteringMPs.size();
+			// int scatteringMPsSize = scatteringMPs.size();
 			for(int i=0; i<scatteringMPsSize; i++) {
-				HitInfo* sHI = scatteringMPs[i];
+				HitInfo sHI = scatteringMPs[i];
 				
-				float r2 = (hi->P - sHI->P).length2();
+				float r2 = (hi->P - sHI.P).length2();
 				float dr = sqrt(r2+zr*zr);
 				float dv = sqrt(r2+zv*zv);
 				float C1 = zr * (sigmaTR + 1.0/dr);
@@ -391,7 +407,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	}
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
-
+*/
 
 
 

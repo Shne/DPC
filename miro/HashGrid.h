@@ -2,7 +2,7 @@
 #define _HashGrid_H_
 
 
-#include "Vector3.h"
+#include "Vector3.cu"
 #include "Ray.h"
 #include <list>
 

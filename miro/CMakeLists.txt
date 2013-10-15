@@ -7,7 +7,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/..)
 find_package(CUDA 4.1 REQUIRED)
 
 # Compile kernels for shader models 1.0 and 2.0 as default
-set(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=\"sm_10,compute_10\" -gencode=arch=compute_20,code=\"sm_20,compute_20\"")
+set(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=\"sm_10,compute_10\" -gencode=arch=compute_20,code=\"sm_20,compute_20\" -G -g")
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -Wno-deprecated")
 SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O3")
@@ -26,35 +26,40 @@ include_directories(
 	${GLEW_INCLUDE_DIR}
 )
 
-#SET(SOURCES
-#	BLPatch
-#	BVH
-#	BuildScenes
-#	Camera
-#	Clock
-#	Console
-#	EnvMapMaterial
-#	GlossyHighlights
-#	HashGrid
-#	Image
-#	Lambert
-#	Material
-#	MiroWindow
-#	PFMLoader
-#	Plane
-#	Scene
-#	SpecularReflection
-#	SpecularRefraction
-#	Sphere
-#	TranslucentGlossyHighlights
-#	Triangle
-#	TriangleMesh
-#	TriangleMeshLoad
 SET(SOURCES
+	BLPatch
+	BVH
+	BuildScenes
+	Camera
+	Clock
+	Console
+	EnvMapMaterial
+	GlossyHighlights
+	HashGrid
+	Image
+	Lambert
+	Material
+	MiroWindow
+	PFMLoader
+	Plane
+	Scene
+	SpecularReflection
+	SpecularRefraction
+	Sphere
+	TranslucentGlossyHighlights
+	Triangle
+	TriangleMesh
+	TriangleMeshLoad
 	main
 	kernel.cu
+	Vector3.cu
 	FinalPassKernel.cu
 )
+#SET(SOURCES
+#	kernel.cu
+#	Vector3.cu
+#	FinalPassKernel.cu
+#)
 
 link_directories(
 	${CMAKE_SOURCE_DIR}/../lib

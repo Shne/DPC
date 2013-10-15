@@ -2,7 +2,7 @@
 #define CSE168_POINTLIGHT_H_INCLUDED
 
 #include <vector>
-#include "Vector3.h"
+#include "Vector3.cu"
 
 class PointLight
 {

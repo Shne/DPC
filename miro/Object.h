@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Miro.h"
-#include "Vector3.h"
+#include "Vector3.cu"
 // #include "Material.h"
 
 class Object

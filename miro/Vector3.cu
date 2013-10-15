@@ -10,6 +10,14 @@
 #pragma warning(disable:4244)
 #endif
 
+#ifdef __CUDACC__
+#define HOST __host__
+#define DEVICE __device__
+#else
+#define HOST
+#define DEVICE
+#endif
+
 class Vector3
 {
 
@@ -22,7 +30,7 @@ public:
     Vector3(float s) :
         x(s), y(s), z(s) {}
 
-    __host__ __device__
+    HOST DEVICE
     Vector3(float xVal, float yVal, float zVal) :
         x(xVal), y(yVal), z(zVal) {}
 
@@ -73,19 +81,19 @@ public:
     }
     
     //! Component-wise vector addition-assignment operator.
-    __host__ __device__
+    HOST DEVICE
     const Vector3 & operator+=(const Vector3& v)
     {
         x += v.x; y += v.y; z += v.z; return *this;
     }
 
     //! Scalar addition-assignment operator.
-    __host__ __device__
+    HOST DEVICE
     const Vector3 & operator+=(float a) {x += a; y += a; z += a; return *this;}
 
 
     //! Component-wise vector subtraction operator.
-    __host__ __device__
+    HOST DEVICE
     Vector3 operator-(const Vector3& v) const
     {
         return Vector3(x - v.x, y - v.y, z - v.z);
@@ -102,11 +110,11 @@ public:
 
 
     //! Scalar multiplication operator.
-    __host__ __device__
+    HOST DEVICE
     Vector3 operator*(float a) const {return Vector3(x * a, y * a, z * a);}
     
     //! Component-wise vector multiplication operator.
-    __host__ __device__
+    HOST DEVICE
     Vector3 operator*(const Vector3& v) const
     {
         return Vector3(x * v.x, y * v.y, z * v.z);
@@ -183,7 +191,7 @@ public:
     /*!
         Returns the geometric length<sup>2</sup> of the vector.
     */
-    __host__ __device__
+    HOST DEVICE
     float length2() const;
     
     //! Length.
@@ -236,7 +244,7 @@ public:
 
 
 //! Multiply a scalar by a Vec3.
-__host__ __device__
+HOST DEVICE
 inline Vector3
 operator*(float s, const Vector3& v)
 {
@@ -245,7 +253,7 @@ operator*(float s, const Vector3& v)
 
 
 //! The dot product of two Vec3s.
-__host__ __device__
+HOST DEVICE
 inline float
 dot(const Vector3 & a, const Vector3 & b)
 {
@@ -262,7 +270,7 @@ cross(const Vector3 & a, const Vector3 & b)
                    a.x * b.y - a.y * b.x);
 }
 
-__host__ __device__
+HOST DEVICE
 inline float
 Vector3::length2() const
 {

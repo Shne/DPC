@@ -10,7 +10,7 @@
 #pragma warning(disable:4244)
 #endif
 
-#include "Vector3.h"
+#include "Vector3.cu"
 #include "Vector4.h"
 
 class Matrix4x4

@@ -1,7 +1,7 @@
 #ifndef CSE168_CAMERA_H_INCLUDED
 #define CSE168_CAMERA_H_INCLUDED
 
-#include "Vector3.h"
+#include "Vector3.cu"
 #include "Miro.h"
 #include "Ray.h"
 

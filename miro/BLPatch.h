@@ -1,7 +1,7 @@
 #ifndef CSE168_BL_PATCH_H_INCLUDED
 #define CSE168_BL_PATCH_H_INCLUDED
 
-#include "Vector3.h"
+#include "Vector3.cu"
 #include "Object.h"
 
 class BLPatch : public Object

@@ -1,7 +1,7 @@
 #ifndef CSE168_SPHERE_H_INCLUDED
 #define CSE168_SPHERE_H_INCLUDED
 
-#include "Vector3.h"
+#include "Vector3.cu"
 #include "Object.h"
 
 class Sphere : public Object
