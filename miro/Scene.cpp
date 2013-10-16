@@ -274,24 +274,33 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
 	
 	std::cout << "kernel call done!               " << clock.stop() << endl;
 	clock.start();
-	std::cout << "Clock";
+	std::cout << "Clock" << endl;
 
 	for (int j = 0; j < img->height(); ++j) {
-		// std::cout << "between for";
+		// std::cout << "between for" << endl;
 		for (int i = 0; i < img->width(); ++i) {
-			// std::cout << "Before";
+			// std::cout << "Before" << endl;
 			HitInfo hi = measureHIArray[j*img->width() + i];
-			// std::cout << "After";
+			// std::cout << "After" << endl;
 
 			// SHADING
 			Vector3 pixelColor;
 			Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
 			
-			Vector3 shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
+			// std::cout << "before shading" << endl;
+			// std::cout << hi.material << endl;
+			std::cout << hi.flux << endl;
+			Vector3 shadeResult;
+			if(hi.material == NULL) {
+				shadeResult = Vector3(0.0f, 0.0f, 0.1f);
+			} else {
+				shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
+			}
+			// std::cout << "after shading" << endl;
 			pixelColor = shadeResult + marbleWhite * hi.flux * (1.0/(photonsPerLight));
 			
 			if(cam->exposure() != 0.0) {
