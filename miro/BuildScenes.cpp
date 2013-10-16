@@ -66,7 +66,7 @@ makeTeapotScene()
 	g_scene->addLight(light);
 
 	g_scene->setInitialHitPointRadius(0.08);
-	g_scene->setPhotonsPerLight(pow(2,19));
+	g_scene->setPhotonsPerLight(pow(2,18));
 	g_scene->setTranslucentMaterialScale(40); //before area scaling, this was 40
 	g_scene->setScatterHitpointRadius(0.08); //default is 0.1
 

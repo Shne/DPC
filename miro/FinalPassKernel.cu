@@ -5,7 +5,7 @@
 
 
 __global__
-void finalPassKernel(int height, int width, HitInfo* dev_scatteringMPs, HitInfo* hiArray, int hiIndex) {
+void finalPassKernel(int height, int width, HitInfo* dev_scatteringMPs, int scatteringMPsSize, HitInfo* hiArray, int hiIndex) {
 	
 	// int i = blockIdx.x*blockDim.x + threadIdx.x;
 	// int j = blockIdx.y*blockDim.y + threadIdx.y;
@@ -31,7 +31,8 @@ void finalPassKernel(int height, int width, HitInfo* dev_scatteringMPs, HitInfo*
 	// int scatteringMPsSize = scatteringMPs.size();
 	// for(int i=0; i<scatteringMPsSize; i++) {
 	// 	HitInfo* sHI = scatteringMPs[i];
-	HitInfo sHI = dev_scatteringMPs[blockIdx.x*blockDim.x + threadIdx.x];
+	int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
 
 	
 	float r2 = (hi.P - sHI.P).length2();
@@ -69,7 +70,7 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
 
 	// Kernel block dimensions
-	const dim3 blockDim(16,16);
+	const dim3 blockDim(8,8);
 
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
@@ -77,7 +78,8 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 			if(hi.t == 0.0f) continue;
 			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, hi);
 			// std::cout << 'H'; fflush(stdout);
-			finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, dev_eyeMPs, j*img->width() + i);
+			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, dev_eyeMPs, j*img->width() + i);
+			finalPassKernel<<<1, 128>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*img->width() + i);
 
 			// Check for errors
 			err = cudaGetLastError();
@@ -90,9 +92,15 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 
 
 
-	HitInfo* result = new HitInfo[width*height];
-	cudaMemcpy(result, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
+	// HitInfo* result = new HitInfo[width*height];
+	cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
 
-	return result;
+	err = cudaGetLastError();
+	if (err != cudaSuccess) {
+		printf("\nCuda error detected: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		exit(1);
+	}
+
+	return measureHIArray;
 }
 

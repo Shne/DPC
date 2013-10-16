@@ -199,7 +199,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 		// m_hashGrids.push_back(scatteringMPs_hg);
 	}
 	
-	
+
 
 
 
@@ -274,15 +274,18 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
 	
-	std::cout << "kernel call done!             " << clock.stop() << "\n";
-	clock.start()
-
+	std::cout << "kernel call done!               " << clock.stop() << endl;
+	clock.start();
+	std::cout << "Clock";
 
 	for (int j = 0; j < img->height(); ++j) {
+		// std::cout << "between for";
 		for (int i = 0; i < img->width(); ++i) {
+			// std::cout << "Before";
 			HitInfo hi = measureHIArray[j*img->width() + i];
+			// std::cout << "After";
 
 			// SHADING
 			Vector3 pixelColor;
@@ -299,6 +302,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			img->setPixel(i, j, pixelColor);
 		}
 	}
+	std::cout << endl;
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
 
