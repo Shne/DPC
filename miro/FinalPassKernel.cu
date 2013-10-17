@@ -7,12 +7,12 @@ using namespace std;
 
 
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux) {
+void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray) {
 	
-	// int i = blockIdx.x*blockDim.x + threadIdx.x;
-	// int j = blockIdx.y*blockDim.y + threadIdx.y;
+	int i = blockIdx.x*blockDim.x + threadIdx.x;
+	int j = blockIdx.y*blockDim.y + threadIdx.y;
 	// HitInfo* hi = dev_eyeMPs[j*width + i];
-	const HitInfo hi = hiArray[hiIndex];
+	HitInfo hi = hiArray[j];
 
 	// if(hi == NULL) return;
 
@@ -29,13 +29,8 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const float zr = lu;
 	const float zv = lu*(1.0f + 4.0f/(3.0f*A));
 
-	// MULTIPLE SCATTER
-	// int scatteringMPsSize = scatteringMPs.size();
-	// for(int i=0; i<scatteringMPsSize; i++) {
-	// 	HitInfo* sHI = scatteringMPs[i];
-	const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	const HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
-
+	// const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	const HitInfo sHI = dev_scatteringMPs[i];
 	
 	const float r2 = (hi.P - sHI.P).length2();
 	const float dr = sqrt(r2+zr*zr);
@@ -46,8 +41,8 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(pow(E,-sigmaTR*dr)/dr*dr) + C2*(pow(E,-sigmaTR*dv)/dv*dv));
 	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
 
-	scatteringMPsFlux[scatteringMPsIndex] = MoP;
-	// hi.flux += MoP;
+	// scatteringMPsFlux[i] = MoP;
+	hi.flux += MoP;
 
 
 	
@@ -59,9 +54,9 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 	int height = img->height();
 
 	static HitInfo *dev_scatteringMPs, *dev_eyeMPs;
-	static Vector3 *scatteringMPsFlux;
+	// static Vector3 *scatteringMPsFlux;
 	cudaMalloc((void**)&dev_scatteringMPs, scatteringMPsSize*sizeof(HitInfo));
-	cudaMalloc((void**)&scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3));
+	// cudaMalloc((void**)&scatteringMPsFlux, width*height*scatteringMPsSize*sizeof(Vector3));
 	cudaMalloc((void**)&dev_eyeMPs, width*height*sizeof(HitInfo));
 	
 
@@ -72,36 +67,56 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 	}
 
 	cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
-	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	err = cudaGetLastError();
+	if( err != cudaSuccess ) {
+		printf("\nCuda error detected when copying scatteringMPs: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		exit(1);
+	}
 
-	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
+	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	err = cudaGetLastError();
+	if( err != cudaSuccess ) {
+		printf("\nCuda error detected when copying measureHIArray: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		exit(1);
+	}
+	// Vector3 *fluxArray = new Vector3[width*height];
 
 	// Kernel block dimensions
-	const dim3 blockDim(8,8);
+	// const dim3 blockDim(8,8);
 
-	for (int j = 0; j < img->height(); ++j) {
-		for (int i = 0; i < img->width(); ++i) {
-			HitInfo hi = measureHIArray[j*width + i];
-			if(hi.t == 0.0f) continue;
-			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, hi);
-			// std::cout << 'H'; fflush(stdout);
-			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, dev_eyeMPs, j*img->width() + i);
+	// for (int j = 0; j < img->height(); ++j) {
+	// 	for (int i = 0; i < img->width(); ++i) {
+			// HitInfo hi = measureHIArray[j*width + i];
+			// if(hi.t == 0.0f) continue;
 
-			dim3 dimBlock(16);
-			dim3 dimGrid = scatteringMPsSize/blockDim.x;
+			const dim3 dimBlock(16, 16);
+			const dim3 dimGrid(scatteringMPsSize/dimBlock.x, width*height/dimBlock.y);
 
-			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i, scatteringMPsFlux);
+			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs);
 			// cout << "after kernel" << endl;
-			cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
-			Vector3 flux;
-			for(int _i = 0; _i < scatteringMPsSize; _i++) {
-				flux += perPixelFlux[_i];
-				// std::cout << perPixelFlux[_i];
-			}
+			// cudaMemcpy(fluxArray, scatteringMPsFlux, width*height*scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
+			// Vector3 flux;
+			// for(int _j = 0; _j < width*height; _j++) {
+			// 	for(int _i = 1; _i < scatteringMPsSize; _i++) {
+			// 		measureHIArray[_j].flux += fluxArray[_i][_j];
+			// 		// fluxArray[0][_j] += fluxArray[_i][_j];
+			// 		// std::cout << fluxArray[_i];
+			// 	}
+			// }
 			// cout << "after sum" << endl;
 			// cout << measureHIArray[j*width+i].flux << " ";
-			measureHIArray[j*width+i].flux = flux;
+			// measureHIArray[j*width+i].flux = flux;
 			// cout << measureHIArray[j*width+i].flux << endl;
+
+
+
+			const char* error = cudaGetErrorString(cudaPeekAtLastError());
+			printf("%s\n", error);
+			error = cudaGetErrorString(cudaThreadSynchronize());
+			printf("%s\n", error);
+
+
+
 
 			// Check for errors
 			err = cudaGetLastError();
@@ -109,13 +124,13 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 				printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
 				exit(1);
 			}
-		}
-	}
+	// 	}
+	// }
 
 
 
 	// HitInfo* result = new HitInfo[width*height];
-	// cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
+	cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
 	
 	
 
@@ -123,7 +138,7 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 
 	err = cudaGetLastError();
 	if (err != cudaSuccess) {
-		printf("\nCuda error detected: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		printf("\nCuda error detected when copying result back: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
 		exit(1);
 	}
 
