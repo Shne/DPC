@@ -66,9 +66,9 @@ makeTeapotScene()
 	g_scene->addLight(light);
 
 	g_scene->setInitialHitPointRadius(0.08);
-	g_scene->setPhotonsPerLight(pow(2,18));
+	g_scene->setPhotonsPerLight(pow(2,21));
 	g_scene->setTranslucentMaterialScale(40); //before area scaling, this was 40
-	g_scene->setScatterHitpointRadius(0.08); //default is 0.1
+	g_scene->setScatterHitpointRadius(0.1); //previously 0.08 //default is 0.1
 
 	// g_scene->loadEnvMap("stpeters_probe.pfm", 1500, 1500);
 	// g_scene->loadEnvMap("rnl_probe.pfm", 900, 900);
@@ -94,7 +94,7 @@ makeTeapotScene()
 
 	TriangleMesh * teapot = new TriangleMesh(teapotMaterial);
 	teapot->load("../teapot.obj");
-	teapot->setMpPerTri(80);
+	teapot->setMpPerTri(80); //80
 	teapot->setProp(1);
 	g_scene->addMeshTrianglesToScene(teapot);
 	

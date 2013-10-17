@@ -243,17 +243,18 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 				}
 
 				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
+				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
 				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); ++sHiIter) {
 					HitInfo* scatteringHI = (*sHiIter);
 					if(scatteringHI == 0) continue;
 					float distance2 = (scatteringHI->P - photonHI.P).length2();
 					
 					if(distance2 < scatteringHI->r2) {
-						// float g = (scatteringHI->photons*ALPHA+ALPHA) 
-						// 		   / (scatteringHI->photons*ALPHA+1.0);
-						// scatteringHI->r2 = scatteringHI->r2*g; 
-						// scatteringHI->photons++;
-						scatteringHI->flux += flux;// * (1./PI) ;//* g;
+						float g = (scatteringHI->photons*ALPHA+ALPHA) 
+								   / (scatteringHI->photons*ALPHA+1.0);
+						scatteringHI->r2 = scatteringHI->r2*g; 
+						scatteringHI->photons++;
+						scatteringHI->flux += flux * (1./PI) * g;
 					}
 				}
 				// }
@@ -292,16 +293,33 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
 			
 			// std::cout << "before shading" << endl;
-			// std::cout << hi.material << endl;
-			std::cout << hi.flux << endl;
+			// if(hi.flux.x > 0.0f || hi.flux.y > 0.0f || hi.flux.x > 0.0f) {
+			// 	cout << j << "," << i << " ";
+			// 	cout << hi.flux;
+			// 	cout << marbleWhite * hi.flux*1000000 * (1.0/(photonsPerLight)) << endl;
+			// }			
+			
+
 			Vector3 shadeResult;
 			if(hi.material == NULL) {
-				shadeResult = Vector3(0.0f, 0.0f, 0.1f);
+				shadeResult = Vector3(0.0f, 0.0f, 0.0f);
 			} else {
+				// std::cout << "Material:" << hi.material;
+				// std::cout << " flux:" << hi.flux;
+				// std::cout << " t:" << hi.t;
+				// std::cout << " P:" << hi.P; 
+				// std::cout << " N:" << hi.N;
+				// std::cout << " r2:" << hi.r2;
+				// std::cout << " A:" << hi.A;
+				// std::cout << " photons:" << hi.photons;
+				// std::cout << " pixel_index:" << hi.pixel_index;
+				// std::cout << " d:" << hi.ray.d;
+				// std::cout << " o:" << hi.ray.o;
+				// std::cout << endl;
 				shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
 			}
 			// std::cout << "after shading" << endl;
-			pixelColor = shadeResult + marbleWhite * hi.flux * (1.0/(photonsPerLight));
+			pixelColor = shadeResult + marbleWhite * hi.flux*100000 * (1.0/(photonsPerLight));
 			
 			if(cam->exposure() != 0.0) {
 				pixelColor = expose(pixelColor, cam->exposure()); //tone mapping
@@ -322,8 +340,8 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 
-/*
 
+/*
 
 
 	// FINAL PASS, for each pixel
@@ -378,15 +396,15 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			for(int i=0; i<scatteringMPsSize; i++) {
 				HitInfo sHI = scatteringMPs[i];
 				
-				float r2 = (hi->P - sHI.P).length2();
+				float r2 = (hi.P - sHI.P).length2();
 				float dr = sqrt(r2+zr*zr);
 				float dv = sqrt(r2+zv*zv);
 				float C1 = zr * (sigmaTR + 1.0/dr);
 				float C2 = zv * (sigmaTR + 1.0/dv);
 
 				float dMoOverAlphaPhi = 1.0/(4.0*PI) * (C1*(pow(E,-sigmaTR*dr)/dr*dr) + C2*(pow(E,-sigmaTR*dv)/dv*dv));
-				Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI->flux * sHI->r2*PI;
-				hi->flux += MoP;
+				Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2*PI;
+				hi.flux += MoP;
 			}
 		
 
@@ -394,15 +412,15 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			Vector3 pixelColor;
 			Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
 			// if(hi->material == NULL) continue;
-			if(hi->material == m_envMapMaterial) {
-				pixelColor = hi->material->shade(hi->ray, (*hi), *this, 0);
+			if(hi.material == m_envMapMaterial) {
+				pixelColor = hi.material->shade(hi.ray, hi, *this, 0);
 			} else {
-				Vector3 shadeResult = hi->material->shade(hi->ray, (*hi), *this, 0);
+				Vector3 shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
 				// pixelColor = shadeResult 
-				// 					   * hi->flux 
-				// 					   * (1.0/(PI * hi->r2 * photonsPerLight));
-				// 				;// + (shadeResult/100.0);
-				pixelColor = shadeResult + marbleWhite * hi->flux * (1.0/(photonsPerLight));
+				// 					   * hi.flux 
+				// 					   * (1.0/(PI * hi.r2 * photonsPerLight));
+				//				;// + (shadeResult/100.0);
+				pixelColor = shadeResult + marbleWhite * hi.flux*100000 * (1.0/(photonsPerLight));
 			}
 			
 			if(cam->exposure() != 0.0) {
@@ -420,9 +438,9 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	}
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
+
+
 */
-
-
 
 
 

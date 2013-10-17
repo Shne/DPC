@@ -38,12 +38,14 @@ public:
     /*!
         Assigns the values from \a a to this Vec3.
     */
+    HOST DEVICE
     const Vector3 & operator=(const Vector3& a) {x = a.x; y = a.y; z = a.z; return *this;}
     
     //! Assignment operator.
     /*!
         Sets all components of this Vec3 to \a a.
     */
+    HOST DEVICE
     const Vector3 & operator=(float a) {x = y = z = a; return *this;}
 
     void set(float a) {x = y = z = a;}

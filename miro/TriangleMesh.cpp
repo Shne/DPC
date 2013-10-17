@@ -60,6 +60,7 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			if(random > m_prop) continue;
 
 			HitInfo mp = HitInfo();
+			mp.flux = 20;
 
 			float R = RAND;
 			float S = RAND;
