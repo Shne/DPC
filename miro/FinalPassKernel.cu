@@ -76,21 +76,24 @@ HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, Hi
 
 	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
 
-	// Kernel block dimensions
-	const dim3 blockDim(8,8);
 
 	for (int j = 0; j < img->height(); ++j) {
 		for (int i = 0; i < img->width(); ++i) {
 			HitInfo hi = measureHIArray[j*width + i];
-			if(hi.t == 0.0f) continue;
+			if(hi.material == NULL) continue;
 			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, hi);
 			// std::cout << 'H'; fflush(stdout);
 			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, dev_eyeMPs, j*img->width() + i);
 
-			dim3 dimBlock(16);
-			dim3 dimGrid = scatteringMPsSize/blockDim.x;
+			dim3 dimBlock(64);
+			dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 
 			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i, scatteringMPsFlux);
+			err = cudaGetLastError();
+			if( err != cudaSuccess ) {
+				printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+				exit(1);
+			}
 			// cout << "after kernel" << endl;
 			cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
 			Vector3 flux;

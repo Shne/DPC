@@ -341,8 +341,8 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 
-/*
 
+/*
 
 	// FINAL PASS, for each pixel
 	clock.start();
@@ -439,8 +439,8 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
 
-
 */
+
 
 
 
