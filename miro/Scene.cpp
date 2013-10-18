@@ -243,18 +243,21 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 				}
 
 				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
-				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
 				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); ++sHiIter) {
 					HitInfo* scatteringHI = (*sHiIter);
+
 					if(scatteringHI == 0) continue;
 					float distance2 = (scatteringHI->P - photonHI.P).length2();
 					
+					cout << distance2 << " " << scatteringHI->r2 << endl;
+
 					if(distance2 < scatteringHI->r2) {
-						float g = (scatteringHI->photons*ALPHA+ALPHA) 
-								   / (scatteringHI->photons*ALPHA+1.0);
-						scatteringHI->r2 = scatteringHI->r2*g; 
-						scatteringHI->photons++;
-						scatteringHI->flux += flux * (1./PI) * g;
+						// float g = (scatteringHI->photons*ALPHA+ALPHA) 
+						// 		   / (scatteringHI->photons*ALPHA+1.0);
+						// scatteringHI->r2 = scatteringHI->r2*g; 
+						// scatteringHI->photons++;
+						cout << scatteringHI->flux << " " << flux << endl;
+						scatteringHI->flux += flux;// * (1./PI) * g;
 					}
 				}
 				// }
@@ -275,7 +278,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
 	
 	std::cout << "kernel call done!               " << clock.stop() << endl;
 	clock.start();
@@ -293,11 +296,11 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			Vector3 marbleWhite = Vector3(0.933333333, 0.917647059, 0.968627451);
 			
 			// std::cout << "before shading" << endl;
-			// if(hi.flux.x > 0.0f || hi.flux.y > 0.0f || hi.flux.x > 0.0f) {
-			// 	cout << j << "," << i << " ";
-			// 	cout << hi.flux;
-			// 	cout << marbleWhite * hi.flux*1000000 * (1.0/(photonsPerLight)) << endl;
-			// }			
+			if(hi.flux.x > 0.0f || hi.flux.y > 0.0f || hi.flux.x > 0.0f) {
+				cout << j << "," << i << " ";
+				cout << hi.flux;
+				cout << marbleWhite * hi.flux*1000000 * (1.0/(photonsPerLight)) << endl;
+			}
 			
 
 			Vector3 shadeResult;

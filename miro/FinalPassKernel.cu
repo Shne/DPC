@@ -8,12 +8,13 @@ using namespace std;
 
 
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int index) {
+void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, HitInfo* hiArray, const int index) {
 	
-	int j = blockIdx.x*blockDim.x + threadIdx.x;
-	int i = blockIdx.y*blockDim.y + threadIdx.y;
-	// HitInfo* hi = dev_eyeMPs[j*width + i];
-	HitInfo hi = hiArray[j*width+i];
+	// int j = blockIdx.x*blockDim.x + threadIdx.x;
+	// int i = blockIdx.y*blockDim.y + threadIdx.y;
+	// HitInfo hi = hiArray[j*width+i];
+
+	HitInfo hi = hiArray[index];
 
 	// if(hi == NULL) return;
 
@@ -50,8 +51,10 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	// int scatteringMPsSize = scatteringMPs.size();
 	// for(int i=0; i<scatteringMPsSize; i++) {
 	// 	HitInfo* sHI = scatteringMPs[i];
-	// const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	const HitInfo sHI = dev_scatteringMPs[index];
+	const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(scatteringMPsIndex >= scatteringMPsSize) {return;}
+	const HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
+	// const HitInfo sHI = dev_scatteringMPs[index];
 
 	
 	const float r2 = (hi.P - sHI.P).length2();
@@ -63,18 +66,23 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(pow(E,-sigmaTR*dr)/dr*dr) + C2*(pow(E,-sigmaTR*dv)/dv*dv));
 	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
 
+	if(sHI.flux.x > 0.0f) {
+		int *hats = (int*)0xffffffff;
+		*hats = 12;
+	}
+
 	// scatteringMPsFlux[scatteringMPsIndex] = MoP;
-	hi.flux += MoP;
+	hiArray[index].flux += MoP;
 }
 
 extern "C" __host__
 HitInfo* finalPass(const Image* img, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const Camera* cam) {
-	cudaProfilerStart();
+	// cudaProfilerStart();
 
 	int width = img->width();
 	int height = img->height();
 
-	HitInfo *dev_scatteringMPs, *dev_eyeMPs;
+	static HitInfo *dev_scatteringMPs, *dev_eyeMPs;
 	// Vector3 *scatteringMPsFlux;
 	cudaMalloc((void**)&dev_scatteringMPs, scatteringMPsSize*sizeof(HitInfo));
 	// cudaMalloc((void**)&scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3));
@@ -87,42 +95,82 @@ HitInfo* finalPass(const Image* img, const HitInfo* scatteringMPs, const int sca
 		exit(1);
 	}
 
-	cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
-	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
-
-	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
-
-	for (int i = 0; i < scatteringMPsSize; i++) {
-		dim3 dimBlock(16,16);
-		dim3 dimGrid(width/dimBlock.x, height/dimBlock.y);
-
-		finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, i);
-		// cout << "after kernel" << endl;
-		// cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
-		// Vector3 flux;
-		// for(int _i = 0; _i < scatteringMPsSize; _i++) {
-		// 	flux += perPixelFlux[_i];
-		// 	// std::cout << perPixelFlux[_i];
-		// }
-		// cout << "after sum" << endl;
-		// cout << measureHIArray[j*width+i].flux << " ";
-		// measureHIArray[j*width+i].flux = flux;
-		// cout << measureHIArray[j*width+i].flux << endl;
-
-		// Check for errors
-		err = cudaGetLastError();
-		if( err != cudaSuccess ) {
-			printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
-			exit(1);
+	for(int derp=0;derp<scatteringMPsSize;derp++){
+		if(scatteringMPs[derp].flux.x > 0.0f) {
+			cout << "HURR" << endl;
 		}
 	}
+
+	cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	// Check for errors
+	err = cudaGetLastError();
+	if( err != cudaSuccess ) {
+		printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		exit(1);
+	}
+
+	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	// Check for errors
+	err = cudaGetLastError();
+	if( err != cudaSuccess ) {
+		printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+		exit(1);
+	}
+
+	// Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
+
+	for (int j = 0; j < img->height(); ++j) {
+		for (int i = 0; i < img->width(); ++i) {
+			HitInfo hi = measureHIArray[j*width + i];
+			if(hi.material == NULL) continue;
+
+			dim3 dimBlock(64);
+			dim3 dimGrid = scatteringMPsSize/dimBlock.x;
+
+			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i);
+
+			// Check for errors
+			err = cudaGetLastError();
+			if( err != cudaSuccess ) {
+				printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+				exit(1);
+			}
+		}
+	}
+
+
+	// for (int i = 0; i < scatteringMPsSize; i++) {
+	// 	dim3 dimBlock(16,16);
+	// 	dim3 dimGrid(width/dimBlock.x, height/dimBlock.y);
+
+	// 	finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, i);
+	// 	// cout << "after kernel" << endl;
+	// 	// cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
+	// 	// Vector3 flux;
+	// 	// for(int _i = 0; _i < scatteringMPsSize; _i++) {
+	// 	// 	flux += perPixelFlux[_i];
+	// 	// 	// std::cout << perPixelFlux[_i];
+	// 	// }
+	// 	// cout << "after sum" << endl;
+	// 	// cout << measureHIArray[j*width+i].flux << " ";
+	// 	// measureHIArray[j*width+i].flux = flux;
+	// 	// cout << measureHIArray[j*width+i].flux << endl;
+
+	// 	// Check for errors
+	// 	err = cudaGetLastError();
+	// 	if( err != cudaSuccess ) {
+	// 		printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
+	// 		exit(1);
+	// 	}
+	// }
 
 
 
 	// HitInfo* result = new HitInfo[width*height];
 	cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
 	
-	
+
+
 	cudaFree(dev_eyeMPs);
 	cudaFree(dev_scatteringMPs);
 
@@ -132,7 +180,7 @@ HitInfo* finalPass(const Image* img, const HitInfo* scatteringMPs, const int sca
 		printf("\nCuda error detected: %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
 		exit(1);
 	}
-	cudaProfilerStop();
+	// cudaProfilerStop();
 	return measureHIArray;
 }
 
