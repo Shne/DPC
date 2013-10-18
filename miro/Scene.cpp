@@ -275,7 +275,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
 	
 	std::cout << "kernel call done!               " << clock.stop() << endl;
 	clock.start();
@@ -341,9 +341,9 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 
+
+
 /*
-
-
 	// FINAL PASS, for each pixel
 	clock.start();
 	int finished_lines = 0;
@@ -438,9 +438,9 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	}
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
-
-
 */
+
+
 
 
 
