@@ -13,17 +13,17 @@ public:
 
 	unsigned int doHash(const int x, const int y, const int z) const;
 
-	void addHitPoint(HitInfo* hi);
+	void addHitPoint(Vector3 P, int index);
 
-	std::list<HitInfo*> lookup(Vector3 position);
-	std::list<HitInfo*> lookup(unsigned int index);
+	std::list<int> lookup(Vector3 position);
+	std::list<int> lookup(unsigned int index);
 
 protected:
 	double scale;
 	float initialRadius;
 	int hashSize;
 	Vector3 maxBVHCorner, minBVHCorner;
-	std::list<HitInfo*>** hash;
+	std::list<int>** hash;
 };
 
 #endif

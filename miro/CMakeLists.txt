@@ -54,6 +54,7 @@ SET(SOURCES
 	kernel.cu
 	Vector3.cu
 	FinalPassKernel.cu
+	PhotonPassKernel.cu
 )
 #SET(SOURCES
 #	kernel.cu

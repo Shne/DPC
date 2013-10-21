@@ -18,6 +18,7 @@
 #include "GlossyHighlights.h"
 
 // #include "kernel.h"
+#include "PhotonPassKernel.h"
 #include "FinalPassKernel.h"
 
 using namespace std;
@@ -170,7 +171,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			// 	measureHIArray[j*img->width() + i] = NULL;
 			// }
 			measureHIArray[j*img->width() + i] = hitInfo;
-			if(hit) eye_mp_hg.addHitPoint(&measureHIArray[j*img->width() + i]);
+			if(hit) eye_mp_hg.addHitPoint(hitInfo.P, j*img->width() + i);
 		}
 	}
 	std::cout << "Eye pass done!                  " << clock.stop() << "\n";
@@ -204,13 +205,18 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 
+
+
+/*
 	// PHOTON PASS, for all lights
 	clock.start();	
 	for(int i = 0; i<m_lights.size(); i++) {
 		int m = 1000*i;
 		Vector3 flux = Vector3(m_lights[i]->wattage()) * (PI*4.0);
 		
-		#pragma omp parallel for num_threads(4) schedule(dynamic)
+		// Vector3* photonPositions = new Vector3[photonsPerLight];
+		// std::list<int>** eyeHiIndexList = new std::list<int>*[photonsPerLight];
+
 		for(int j = 0; j<photonsPerLight; j++) {
 			float p = 2. * PI * hal(0,m+j),
 				  t = 2. * acos(sqrt(1.-hal(1,m+j))),
@@ -223,10 +229,124 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			HitInfo photonHI;
 			if(trace(photonHI, r)) {
 
-				std::list<HitInfo*> hiList = eye_mp_hg.lookup(photonHI.P);
+				std::list<int> eyeHiIndexList = eye_mp_hg.lookup(photonHI.P);
+				int measureHIArraySize = img->width() * img->height();
+
+				// photonPositions[j] = photonHI.P;
+
+
+				measureHIArray = photonEyePass(measureHIArraySize, measureHIArray, eyeHiIndexList, photonHI.P, flux);
+
 				
-				for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); hiIter++) {
-					HitInfo* measureHI = (*hiIter);
+				// for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); hiIter++) {
+				// 	HitInfo* measureHI = (*hiIter);
+
+				// 	if(measureHI == 0) continue;
+				// 	// if(measureHI->material == m_envMapMaterial) continue;
+
+
+
+
+
+				// 	float distance2 = (measureHI->P - photonHI.P).length2();
+				// 	// std::cout << (*hiIter) << std::endl;
+				// 	// std::cout << "eye dist, r2: " << distance2 << " " << measureHI->r2 << std::endl;
+					
+				// 	if(distance2 < measureHI->r2) {
+				// 		// std::cout << "EYE" << std::endl;
+				// 		float g = (measureHI->photons*ALPHA+ALPHA) 
+				// 				   / (measureHI->photons*ALPHA+1.0);
+				// 		measureHI->r2 = measureHI->r2*g;
+				// 		measureHI->photons++;
+				// 		measureHI->flux += flux * (1./PI) * g;
+				// 	}
+				// }
+
+				std::list<int> scatteringHiIndexList = scatteringMPs_hg.lookup(photonHI.P);
+
+				scatteringMPs = photonScatterPass(scatteringMPsSize, scatteringMPs, scatteringHiIndexList, photonHI.P, flux);
+				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
+				// for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); sHiIter++) {
+				// 	HitInfo* scatteringHI = (*sHiIter);
+				// 	if(scatteringHI == 0) continue;
+				// 	float distance2 = (scatteringHI->P - photonHI.P).length2();
+				// 	// std::cout << scatteringHI->P << "     " << photonHI.P << std::endl; 
+				// 	// std::cout << scatteringHI->P - photonHI.P << std::endl;
+				// 	// std::cout <<  << std::endl;
+				// 	// if(scatteringHI->r2 < 0.0f) { 
+				// 	// std::cout << "scattering: dist, r2 " << distance2 << "  " << scatteringHI->r2 << endl;
+				// 	// }
+				// 	if(distance2 < scatteringHI->r2) {
+				// 		// std::cout << "scatter" << endl;
+				// 		// float g = (scatteringHI->photons*ALPHA+ALPHA) 
+				// 		// 		   / (scatteringHI->photons*ALPHA+1.0);
+				// 		// scatteringHI->r2 = scatteringHI->r2*g; 
+				// 		// scatteringHI->photons++;
+				// 		scatteringHI->flux += flux;// * (1./PI) * g;
+				// 	}
+				// }
+				// }
+			}
+			if(j % 10000 == 0) {
+				printf("Photon Pass Progress: %.3f%%\r", (j)/float(photonsPerLight) *100.0f);
+				fflush(stdout);
+			}
+		}
+	}
+	std::cout << "Photon pass done!               " << clock.stop() << "\n";
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// PHOTON PASS, for all lights
+	clock.start();	
+	for(int i = 0; i<m_lights.size(); i++) {
+		int m = 1000*i;
+		Vector3 flux = Vector3(m_lights[i]->wattage()) * (PI*4.0);
+		
+		for(int j = 0; j<photonsPerLight; j++) {
+			float p = 2. * PI * hal(0,m+j),
+				  t = 2. * acos(sqrt(1.-hal(1,m+j))),
+					st = sin(t);
+
+			Ray r;
+			r.d = Vector3(cos(p)*st, cos(t), sin(p)*st).normalize();
+			r.o = m_lights[i]->position();
+
+			HitInfo photonHI;
+			if(trace(photonHI, r)) {
+
+				std::list<int> hiIndexList = eye_mp_hg.lookup(photonHI.P);
+				
+				for(std::list<int>::iterator hiIter = hiIndexList.begin(); hiIter != hiIndexList.end(); hiIter++) {
+					HitInfo* measureHI = &measureHIArray[(*hiIter)];
+					// HitInfo* measureHI = (*hiIter);
 
 					if(measureHI == 0) continue;
 					// if(measureHI->material == m_envMapMaterial) continue;
@@ -245,10 +365,10 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 					}
 				}
 
-				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
+				std::list<int> scatteringHiIndexList = scatteringMPs_hg.lookup(photonHI.P);
 				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
-				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); sHiIter++) {
-					HitInfo* scatteringHI = (*sHiIter);
+				for(std::list<int>::iterator sHiIter = scatteringHiIndexList.begin(); sHiIter != scatteringHiIndexList.end(); sHiIter++) {
+					HitInfo* scatteringHI = &scatteringMPs[(*sHiIter)];
 					if(scatteringHI == 0) continue;
 					float distance2 = (scatteringHI->P - photonHI.P).length2();
 					// std::cout << scatteringHI->P << "     " << photonHI.P << std::endl; 

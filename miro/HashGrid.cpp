@@ -10,9 +10,9 @@ HashGrid::initializeGrid(Vector3 minCorner, Vector3 maxCorner, int inputHashSize
 
 	hashSize = inputHashSize;
 
-	hash = new std::list<HitInfo*>*[hashSize];
+	hash = new std::list<int>*[hashSize];
 	for(unsigned int i=0; i<hashSize; i++) {
-		hash[i] = new std::list<HitInfo*>();
+		hash[i] = new std::list<int>();
 	}
 }
 
@@ -23,11 +23,11 @@ HashGrid::doHash(const int x, const int y, const int z) const {
 
 
 void
-HashGrid::addHitPoint(HitInfo* hi){
+HashGrid::addHitPoint(Vector3 P, int index){
 	// Vector3 BMin = ((hi->P - initialRadius) - minBVHCorner) * scale;
 	// Vector3 BMax = ((hi->P + initialRadius) - minBVHCorner) * scale;
-	Vector3 BMin = hi->P - initialRadius;
-	Vector3 BMax = hi->P + initialRadius;
+	Vector3 BMin = P - initialRadius;
+	Vector3 BMax = P + initialRadius;
 	// for (int iz = abs(int(BMin.z)); iz <= abs(int(BMax.z)); iz++) {
 	// 	for (int iy = abs(int(BMin.y)); iy <= abs(int(BMax.y)); iy++) {
 	// 		for (int ix = abs(int(BMin.x)); ix <= abs(int(BMax.x)); ix++) {
@@ -47,19 +47,19 @@ HashGrid::addHitPoint(HitInfo* hi){
 			for (int ix = static_cast<int>(BMin.x); ix <= static_cast<int>(BMax.x); ix++) {
 				if(ix < minBVHCorner.x) continue;
 				unsigned int hv = doHash(ix,iy,iz); 
-				hash[hv]->push_front(hi);
+				hash[hv]->push_front(index);
 			}
 		}
 	}
 }
 
-std::list<HitInfo*>
+std::list<int>
 HashGrid::lookup(Vector3 position) {
 	unsigned int index = doHash(position.x, position.y, position.z);
 	return lookup(index);
 }
 
-std::list<HitInfo*>
+std::list<int>
 HashGrid::lookup(unsigned int index) {
 	return (*hash[index]);
 }

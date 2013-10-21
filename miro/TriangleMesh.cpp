@@ -116,7 +116,7 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			// mp->A = Area;
 			mpArray[i*j] = mp;
 			// mpVector.push_back(mp);
-			hg->addHitPoint(&mpArray[i*j]);
+			hg->addHitPoint(mp.P, i*j);
 		}
 	}
 	// std::cout << "Number of scatter samples:      " << mpVector.size() << "\n";
