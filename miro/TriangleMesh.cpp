@@ -60,7 +60,6 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			if(random > m_prop) continue;
 
 			HitInfo mp = HitInfo();
-			mp.flux = 20;
 
 			float R = RAND;
 			float S = RAND;
@@ -109,7 +108,6 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			Vector3 normal = alpha*norms[0] + beta*norms[1] + gamma*norms[2];
 			// Vector3 normal = (norms[0] + norms[1] + norms[2]).normalize();
 			
-		
 			mp.r2 = hitPointRadius*hitPointRadius;
 			// mp->r2 = (Area/PI) * hitPointRadius*hitPointRadius; //using hitpoint radius as a scaling factor instead and set radius based on triangle size.
 			// mp->P = middlePoint;
@@ -118,7 +116,7 @@ TriangleMesh::calculateMPs(Vector3 minCorner, Vector3 maxCorner, HashGrid* hg, f
 			// mp->A = Area;
 			mpArray[i*j] = mp;
 			// mpVector.push_back(mp);
-			hg->addHitPoint(&mp);
+			hg->addHitPoint(&mpArray[i*j]);
 		}
 	}
 	// std::cout << "Number of scatter samples:      " << mpVector.size() << "\n";

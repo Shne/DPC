@@ -82,8 +82,21 @@ main(int argc, char*argv[])
 	// makeCubeScene();
 	// makeSmallLightScene();
 
-	MiroWindow miro(&argc, argv);
-	miro.mainLoop();
+
+	// g_camera->setRenderer(Camera::RENDER_RAYTRACE);
+	// g_camera->click(g_scene, g_image);
+	g_image->clear(g_camera->bgColor());
+	g_scene->photonmapImage(g_camera, g_image);
+	g_image->draw();
+
+	char str[1024];
+    sprintf(str, "miro_%ld.ppm", time(0));
+    g_image->writePPM(str);
+
+    std::cout << "image saved as " << str << std::endl;
+
+	// MiroWindow miro(&argc, argv);
+	// miro.mainLoop();
 
 	return 0; // never executed
 }

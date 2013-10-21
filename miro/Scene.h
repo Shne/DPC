@@ -34,7 +34,7 @@ public:
     void setInitialHitPointRadius(float r) { initialHitPointRadius = r;}
     void setPhotonsPerLight(unsigned int i) { photonsPerLight = i;}
     void addMeshTrianglesToScene(TriangleMesh * mesh);
-    void setTranslucentMaterialScale(float scale) {TranslucentMaterialScale = scale;}
+    void setTranslucentMaterialScale(float scale) {translucentMaterialScale = scale;}
     void setScatterHitpointRadius(float radius) {scatterHitpointRadius = radius;}
 
     inline bool hasEnvMap() {return m_envMapMaterial != 0;}
@@ -62,7 +62,7 @@ protected:
     unsigned int static totalRays;
     float srgbEncode(float c);
     int static const maxDepth = 6;
-    float TranslucentMaterialScale; //60
+    float translucentMaterialScale; //60
     float scatterHitpointRadius; // = 0.1;
 };
 

@@ -26,4 +26,6 @@ each file has a "setup" method receiving pointers to data and returning result. 
 
 
 
+## Other optimizations
+In the final pass, try and avoid sqrt. See if there is a fast approximate version somewhere, somehow. Perhaps in cuda itself
 

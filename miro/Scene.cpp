@@ -170,7 +170,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			// 	measureHIArray[j*img->width() + i] = NULL;
 			// }
 			measureHIArray[j*img->width() + i] = hitInfo;
-			if(hit) eye_mp_hg.addHitPoint(&hitInfo);
+			if(hit) eye_mp_hg.addHitPoint(&measureHIArray[j*img->width() + i]);
 		}
 	}
 	std::cout << "Eye pass done!                  " << clock.stop() << "\n";
@@ -223,17 +223,20 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			HitInfo photonHI;
 			if(trace(photonHI, r)) {
 
-				//for each hashgrid in vector of hashgrids
 				std::list<HitInfo*> hiList = eye_mp_hg.lookup(photonHI.P);
 				
-				for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); ++hiIter) {
+				for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); hiIter++) {
 					HitInfo* measureHI = (*hiIter);
+
 					if(measureHI == 0) continue;
-					if(measureHI->material == m_envMapMaterial) continue;
+					// if(measureHI->material == m_envMapMaterial) continue;
 
 					float distance2 = (measureHI->P - photonHI.P).length2();
+					// std::cout << (*hiIter) << std::endl;
+					// std::cout << "eye dist, r2: " << distance2 << " " << measureHI->r2 << std::endl;
 					
 					if(distance2 < measureHI->r2) {
+						// std::cout << "EYE" << std::endl;
 						float g = (measureHI->photons*ALPHA+ALPHA) 
 								   / (measureHI->photons*ALPHA+1.0);
 						measureHI->r2 = measureHI->r2*g;
@@ -244,17 +247,23 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
 				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
-				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); ++sHiIter) {
+				for(std::list<HitInfo*>::iterator sHiIter = scatteringHiList.begin(); sHiIter != scatteringHiList.end(); sHiIter++) {
 					HitInfo* scatteringHI = (*sHiIter);
 					if(scatteringHI == 0) continue;
 					float distance2 = (scatteringHI->P - photonHI.P).length2();
-					
+					// std::cout << scatteringHI->P << "     " << photonHI.P << std::endl; 
+					// std::cout << scatteringHI->P - photonHI.P << std::endl;
+					// std::cout <<  << std::endl;
+					// if(scatteringHI->r2 < 0.0f) { 
+					// std::cout << "scattering: dist, r2 " << distance2 << "  " << scatteringHI->r2 << endl;
+					// }
 					if(distance2 < scatteringHI->r2) {
-						float g = (scatteringHI->photons*ALPHA+ALPHA) 
-								   / (scatteringHI->photons*ALPHA+1.0);
-						scatteringHI->r2 = scatteringHI->r2*g; 
-						scatteringHI->photons++;
-						scatteringHI->flux += flux * (1./PI) * g;
+						// std::cout << "scatter" << endl;
+						// float g = (scatteringHI->photons*ALPHA+ALPHA) 
+						// 		   / (scatteringHI->photons*ALPHA+1.0);
+						// scatteringHI->r2 = scatteringHI->r2*g; 
+						// scatteringHI->photons++;
+						scatteringHI->flux += flux;// * (1./PI) * g;
 					}
 				}
 				// }
@@ -275,11 +284,10 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	measureHIArray = finalPass(img, scatteringMPs, scatteringMPsSize, measureHIArray, cam);
+	measureHIArray = finalPass(img->width(), img->height(), scatteringMPs, scatteringMPsSize, measureHIArray, translucentMaterialScale);
 	
 	std::cout << "kernel call done!               " << clock.stop() << endl;
 	clock.start();
-	std::cout << "Clock" << endl;
 
 	for (int j = 0; j < img->height(); ++j) {
 		// std::cout << "between for" << endl;
@@ -319,7 +327,8 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 				shadeResult = hi.material->shade(hi.ray, hi, *this, 0);
 			}
 			// std::cout << "after shading" << endl;
-			pixelColor = shadeResult + marbleWhite * hi.flux*100000 * (1.0/(photonsPerLight));
+			//flux was timed with 100000
+			pixelColor = shadeResult + marbleWhite * hi.flux * (1.0/(photonsPerLight));
 			
 			if(cam->exposure() != 0.0) {
 				pixelColor = expose(pixelColor, cam->exposure()); //tone mapping
@@ -329,7 +338,6 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			img->setPixel(i, j, pixelColor);
 		}
 	}
-	std::cout << endl;
 	std::cout << "Final pass done!                " << clock.stop() << "\n";
 
 
@@ -420,7 +428,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 				// 					   * hi.flux 
 				// 					   * (1.0/(PI * hi.r2 * photonsPerLight));
 				//				;// + (shadeResult/100.0);
-				pixelColor = shadeResult + marbleWhite * hi.flux*100000 * (1.0/(photonsPerLight));
+				pixelColor = shadeResult + marbleWhite * hi.flux * (1.0/(photonsPerLight));
 			}
 			
 			if(cam->exposure() != 0.0) {

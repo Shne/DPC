@@ -65,10 +65,10 @@ makeTeapotScene()
 	light->setWattage(700);
 	g_scene->addLight(light);
 
-	g_scene->setInitialHitPointRadius(0.08);
-	g_scene->setPhotonsPerLight(pow(2,21));
+	g_scene->setInitialHitPointRadius(0.08f); //was 0.08
+	g_scene->setPhotonsPerLight(pow(2,19));
 	g_scene->setTranslucentMaterialScale(40); //before area scaling, this was 40
-	g_scene->setScatterHitpointRadius(0.1); //previously 0.08 //default is 0.1
+	g_scene->setScatterHitpointRadius(0.08f); //previously 0.08 //default is 0.1
 
 	// g_scene->loadEnvMap("stpeters_probe.pfm", 1500, 1500);
 	// g_scene->loadEnvMap("rnl_probe.pfm", 900, 900);
@@ -141,6 +141,7 @@ makeDragonSmoothScene()
 	g_scene->setInitialHitPointRadius(0.1);
 	g_scene->setPhotonsPerLight(pow(2,22));
 	g_scene->setTranslucentMaterialScale(40); //perhaps higher value of this.
+	g_scene->setScatterHitpointRadius(0.1f);
 
 	// g_camera->setLensRadius(.1);
 	// g_camera->setFocalPlaneDistance(8.0);
@@ -178,7 +179,7 @@ makeDragonSmoothScene()
 	// Material* floorMaterial = new GlossyHighlights(Vector3(0.5f), Vector3(0.5f), Vector3(0.01f), 50.0f);
 
 	TriangleMesh * dragon = new TriangleMesh(dragonMaterial);
-	dragon->load("dragon_smooth.obj");
+	dragon->load("../dragon_smooth.obj");
 	dragon->setMpPerTri(1);
 	dragon->setProp(.5);
 	g_scene->addMeshTrianglesToScene(dragon);

@@ -7,7 +7,7 @@
 #include "Ray.h"
 
 extern "C" 
-HitInfo* finalPass(Image* img, HitInfo* scatteringMPs, int scatteringMPsSize, HitInfo* measureHIArray, Camera* cam);
+HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale);
 
 
 #endif /* _FINAL_PASS_KERNEL_H_ */
