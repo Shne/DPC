@@ -29,3 +29,11 @@ each file has a "setup" method receiving pointers to data and returning result. 
 ## Other optimizations
 In the final pass, try and avoid sqrt. See if there is a fast approximate version somewhere, somehow. Perhaps in cuda itself
 
+
+## new optimizations
+Photon Pass. Try without hashgrid, that is, looking at ALL MPs in parallel.
+Photon Pass. Try using WARP_SIZE to divide each hashgrid list across single warp, so they all have the same depth (ish) and thus have no diverging conditionals in one warp
+
+Final Pass. Sum reduction (see slide 21 in 06++performance...) 
+Final Pass. concurrently copy memory and do calculations, (slide 43)
+Final Pass. See if we can use strided access somewhere... (slide 47)
