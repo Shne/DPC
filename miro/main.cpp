@@ -14,6 +14,8 @@
 
 #include "BuildScenes.h"
 
+#include "cuda_runtime_api.h"
+
 // #include <cuda.h>
 // #include <cuda_runtime.h>
 // #include <cuda_gl_interop.h>
@@ -97,7 +99,7 @@ main(int argc, char*argv[])
 
 	// MiroWindow miro(&argc, argv);
 	// miro.mainLoop();
-
+    cudaDeviceReset();
 	return 0; // never executed
 }
 

@@ -7,8 +7,23 @@
 using namespace std;
 
 
+//from http://www.codeproject.com/Articles/69941/Best-Square-Root-Method-Algorithm-Function-Precisi
+// __device__
+// float sqrt7(float x) {
+// 	unsigned int i = *(unsigned int*) &x; 
+// 	// adjust bias
+// 	i  += 127 << 23;
+// 	// approximation of square root
+// 	i >>= 1; 
+// 	return *(float*) &i;
+// }
+
+
+
+
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux, const float translucentMaterialScale) {
+void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux,
+                     const float sigmaTR, const float Fdt, const float zr, const float zv) {
 	
 	// int i = blockIdx.x*blockDim.x + threadIdx.x;
 	// int j = blockIdx.y*blockDim.y + threadIdx.y;
@@ -17,6 +32,7 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 
 	// if(hi == NULL) return;
 
+/*
 	const float my = 1.3;
 	const float sigmaS = 2.6f		* translucentMaterialScale;
 	const float sigmaA = 0.0041f 	* translucentMaterialScale;
@@ -29,7 +45,7 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const float A = (1 + Fdr) / (1 - Fdr);
 	const float zr = lu;
 	const float zv = lu*(1.0f + 4.0f/(3.0f*A));
-
+*/
 
 /*
 	//PRECOMPUTED VALUES
@@ -57,8 +73,8 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 
 	
 	const float r2 = (hi.P - sHI.P).length2();
-	const float dr = sqrt(r2+zr*zr);
-	const float dv = sqrt(r2+zv*zv);
+	const float dr = sqrtf(r2+zr*zr);
+	const float dv = sqrtf(r2+zv*zv);
 	const float C1 = zr * (sigmaTR + 1.0f/dr);
 	const float C2 = zv * (sigmaTR + 1.0f/dv);
 
@@ -66,11 +82,17 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
 
 	scatteringMPsFlux[scatteringMPsIndex] = MoP;
-	// hi.flux += MoP;
-
-
-	
+	// hi.flux += MoP;	
 }
+
+
+
+
+
+
+
+
+
 
 extern "C" __host__
 HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale) {
@@ -95,6 +117,25 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
 
 
+
+	//VALUES FOR DIPOLE DIFFUSION MULTIPLE SCATTER
+	const float my = 1.3;
+	const float sigmaS = 2.6f		* translucentMaterialScale;
+	const float sigmaA = 0.0041f 	* translucentMaterialScale;
+	const float sigmaT = sigmaS + sigmaA;
+	// const float alpha = sigmaS / sigmaT;
+	const float sigmaTR = sqrt(3.0f*sigmaA*sigmaT);
+	const float lu = 1.0f/sigmaT;
+	const float Fdr =  -1.440f/(my*my) + 0.710f*my + 0.668f + 0.0636f*my;
+	const float Fdt = 1.0f - Fdr;
+	const float A = (1 + Fdr) / (1 - Fdr);
+	const float zr = lu;
+	const float zv = lu*(1.0f + 4.0f/(3.0f*A));
+
+
+
+
+
 	for (int j = 0; j < height; ++j) {
 		for (int i = 0; i < width; ++i) {
 			HitInfo hi = measureHIArray[j*width + i];
@@ -106,7 +147,8 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 			dim3 dimBlock(64);
 			dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 
-			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i, scatteringMPsFlux, translucentMaterialScale);
+			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i, scatteringMPsFlux, 
+				                                    sigmaTR, Fdt, zr, zv);
 			err = cudaGetLastError();
 			if( err != cudaSuccess ) {
 				printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
