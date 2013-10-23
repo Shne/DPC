@@ -6,31 +6,11 @@
 
 using namespace std;
 
-
-//from http://www.codeproject.com/Articles/69941/Best-Square-Root-Method-Algorithm-Function-Precisi
-// __device__
-// float sqrt7(float x) {
-// 	unsigned int i = *(unsigned int*) &x; 
-// 	// adjust bias
-// 	i  += 127 << 23;
-// 	// approximation of square root
-// 	i >>= 1; 
-// 	return *(float*) &i;
-// }
-
-
-
-
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux,
+void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const Vector3 hiP, Vector3 *scatteringMPsFlux,
                      const float sigmaTR, const float Fdt, const float zr, const float zv) {
 	
-	// int i = blockIdx.x*blockDim.x + threadIdx.x;
-	// int j = blockIdx.y*blockDim.y + threadIdx.y;
-	// HitInfo* hi = dev_eyeMPs[j*width + i];
-	const HitInfo hi = hiArray[hiIndex];
-
-	// if(hi == NULL) return;
+	// const HitInfo hi = hiArray[hiIndex];
 
 /*
 	const float my = 1.3;
@@ -65,20 +45,18 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 
 
 	// MULTIPLE SCATTER
-	// int scatteringMPsSize = scatteringMPs.size();
-	// for(int i=0; i<scatteringMPsSize; i++) {
-	// 	HitInfo* sHI = scatteringMPs[i];
 	const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	const HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
-
+	// localScatteringMPs[threadIdx.x] = dev_scatteringMPs[scatteringMPsIndex];
+	// __syncthreads();
 	
-	const float r2 = (hi.P - sHI.P).length2();
+	const float r2 = (hiP - sHI.P).length2();
 	const float dr = sqrtf(r2+zr*zr);
 	const float dv = sqrtf(r2+zv*zv);
 	const float C1 = zr * (sigmaTR + 1.0f/dr);
 	const float C2 = zv * (sigmaTR + 1.0f/dv);
 
-	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(pow(E,-sigmaTR*dr)/dr*dr) + C2*(pow(E,-sigmaTR*dv)/dv*dv));
+	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(powf(E,-sigmaTR*dr)/dr*dr) + C2*(powf(E,-sigmaTR*dv)/dv*dv));
 	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
 
 	scatteringMPsFlux[scatteringMPsIndex] = MoP;
@@ -98,11 +76,11 @@ extern "C" __host__
 HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale) {
 	// cudaProfilerStart();
 
-	static HitInfo *dev_scatteringMPs, *dev_eyeMPs;
+	static HitInfo *dev_scatteringMPs;//, *dev_eyeMPs;
 	static Vector3 *scatteringMPsFlux;
 	cudaMalloc((void**)&dev_scatteringMPs, scatteringMPsSize*sizeof(HitInfo));
 	cudaMalloc((void**)&scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3));
-	cudaMalloc((void**)&dev_eyeMPs, width*height*sizeof(HitInfo));
+	// cudaMalloc((void**)&dev_eyeMPs, width*height*sizeof(HitInfo));
 	
 
 	cudaError_t err = cudaGetLastError();
@@ -112,10 +90,9 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 	}
 
 	cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
-	cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	// cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
 
 	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
-
 
 
 	//VALUES FOR DIPOLE DIFFUSION MULTIPLE SCATTER
@@ -132,23 +109,18 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 	const float zr = lu;
 	const float zv = lu*(1.0f + 4.0f/(3.0f*A));
 
-
-
-
+	std::cout << "scatteringMPsSize: " << scatteringMPsSize << " total size: " << scatteringMPsSize*sizeof(HitInfo) << std::endl;
 
 	for (int j = 0; j < height; ++j) {
 		for (int i = 0; i < width; ++i) {
 			HitInfo hi = measureHIArray[j*width + i];
 			if(hi.material == NULL) continue;
-			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, hi);
-			// std::cout << 'H'; fflush(stdout);
-			// finalPassKernel<<<dim3(width/blockDim.x, height/blockDim.y), blockDim>>>(height, width, dev_scatteringMPs, dev_eyeMPs, j*img->width() + i);
 
 			dim3 dimBlock(64);
 			dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 
-			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, dev_eyeMPs, j*width + i, scatteringMPsFlux, 
-				                                    sigmaTR, Fdt, zr, zv);
+			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, hi.P, scatteringMPsFlux, sigmaTR, Fdt, zr, zv);
+
 			err = cudaGetLastError();
 			if( err != cudaSuccess ) {
 				printf("\nCuda error detected in 'finalPassKernel': %s. Quitting.\n", cudaGetErrorString(err) ); fflush(stdout);
