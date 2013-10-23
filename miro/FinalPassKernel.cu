@@ -6,8 +6,15 @@
 
 using namespace std;
 
+
+texture <float4> scatteringPositions_tex;
+texture <float4> scatteringFlux_tex;
+texture <float> scatteringR2_tex;
+
+
+
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const Vector3 hiP, Vector3 *scatteringMPsFlux,
+void finalPassKernel(const int height, const int width, /*const HitInfo* dev_scatteringMPs,*/ const int scatteringMPsSize, const Vector3 hiP, Vector3 *scatteringMPsFlux,
                      const float sigmaTR, const float Fdt, const float zr, const float zv) {
 	
 	// const HitInfo hi = hiArray[hiIndex];
@@ -46,18 +53,26 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 
 	// MULTIPLE SCATTER
 	const int scatteringMPsIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	const HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
+	// const HitInfo sHI = dev_scatteringMPs[scatteringMPsIndex];
+	const float4 scatteringP_f = tex1Dfetch(scatteringPositions_tex, scatteringMPsIndex);
+	const float4 scatteringFlux_f = tex1Dfetch(scatteringFlux_tex, scatteringMPsIndex);
+	const float scatteringR2 = tex1Dfetch(scatteringR2_tex, scatteringMPsIndex);
+
+	const Vector3 scatteringP = Vector3(scatteringP_f.x, scatteringP_f.y, scatteringP_f.z);
+	const Vector3 scatteringFlux = Vector3(scatteringFlux_f.x, scatteringFlux_f.y, scatteringFlux_f.z);
+
+
 	// localScatteringMPs[threadIdx.x] = dev_scatteringMPs[scatteringMPsIndex];
 	// __syncthreads();
 	
-	const float r2 = (hiP - sHI.P).length2();
+	const float r2 = (hiP - scatteringP).length2();
 	const float dr = sqrtf(r2+zr*zr);
 	const float dv = sqrtf(r2+zv*zv);
 	const float C1 = zr * (sigmaTR + 1.0f/dr);
 	const float C2 = zv * (sigmaTR + 1.0f/dv);
 
 	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(powf(E,-sigmaTR*dr)/dr*dr) + C2*(powf(E,-sigmaTR*dv)/dv*dv));
-	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
+	const Vector3 MoP = Fdt * dMoOverAlphaPhi * scatteringFlux * scatteringR2 * PI;
 
 	scatteringMPsFlux[scatteringMPsIndex] = MoP;
 	// hi.flux += MoP;	
@@ -76,9 +91,42 @@ extern "C" __host__
 HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale) {
 	// cudaProfilerStart();
 
-	static HitInfo *dev_scatteringMPs;//, *dev_eyeMPs;
+
+
+	//split scatteringMPs into 3 arrays of position, flux and r2. to be able to use textures
+	float4 scatteringPositions[scatteringMPsSize];
+	float4 scatteringFlux[scatteringMPsSize];
+	float scatteringR2[scatteringMPsSize];
+	for(int i = 0; i<scatteringMPsSize; i++) {
+		HitInfo sHI = scatteringMPs[i];
+		scatteringPositions[i] = make_float4(sHI.P.x, sHI.P.y, sHI.P.z, 0.0f);
+		scatteringFlux[i] = make_float4(sHI.flux.x, sHI.flux.y, sHI.flux.z, 0.0f);
+		scatteringR2[i] = scatteringMPs[i].r2;
+	}
+
+	static float4 *dev_scatteringPositions, *dev_scatteringFlux;
+	static float *dev_scatteringR2;
+	cudaMalloc((void**)&dev_scatteringPositions, scatteringMPsSize*sizeof(float4));
+	cudaMalloc((void**)&dev_scatteringFlux, scatteringMPsSize*sizeof(float4));
+	cudaMalloc((void**)&dev_scatteringR2, scatteringMPsSize*sizeof(float));
+
+	std::cout << "allocated" << std::endl;
+
+	cudaMemcpy( dev_scatteringPositions, scatteringPositions, scatteringMPsSize*sizeof(float4), cudaMemcpyHostToDevice );
+	cudaMemcpy( dev_scatteringFlux, scatteringFlux, scatteringMPsSize*sizeof(float4), cudaMemcpyHostToDevice );
+	cudaMemcpy( dev_scatteringR2, scatteringR2, scatteringMPsSize*sizeof(float), cudaMemcpyHostToDevice );
+
+	std::cout << "Memcpy'ed" << std::endl;
+
+	cudaBindTexture( NULL, scatteringPositions_tex, dev_scatteringPositions, scatteringMPsSize*sizeof(float4));
+	cudaBindTexture( NULL, scatteringFlux_tex, dev_scatteringFlux, scatteringMPsSize*sizeof(float4));
+	cudaBindTexture( NULL, scatteringR2_tex, dev_scatteringR2, scatteringMPsSize*sizeof(float));
+
+	std::cout << "Textures bound" << std::endl;
+
+	// static HitInfo *dev_scatteringMPs;//, *dev_eyeMPs;
 	static Vector3 *scatteringMPsFlux;
-	cudaMalloc((void**)&dev_scatteringMPs, scatteringMPsSize*sizeof(HitInfo));
+	// cudaMalloc((void**)&dev_scatteringMPs, scatteringMPsSize*sizeof(HitInfo));
 	cudaMalloc((void**)&scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3));
 	// cudaMalloc((void**)&dev_eyeMPs, width*height*sizeof(HitInfo));
 	
@@ -89,7 +137,7 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 		exit(1);
 	}
 
-	cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
+	// cudaMemcpy( dev_scatteringMPs, scatteringMPs, scatteringMPsSize*sizeof(HitInfo), cudaMemcpyHostToDevice );
 	// cudaMemcpy( dev_eyeMPs, measureHIArray, width*height*sizeof(HitInfo), cudaMemcpyHostToDevice );
 
 	Vector3 *perPixelFlux = new Vector3[scatteringMPsSize];
@@ -119,7 +167,7 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 			dim3 dimBlock(64);
 			dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 
-			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, dev_scatteringMPs, scatteringMPsSize, hi.P, scatteringMPsFlux, sigmaTR, Fdt, zr, zv);
+			finalPassKernel<<<dimGrid, dimBlock>>>(height, width, /*dev_scatteringMPs,*/ scatteringMPsSize, hi.P, scatteringMPsFlux, sigmaTR, Fdt, zr, zv);
 
 			err = cudaGetLastError();
 			if( err != cudaSuccess ) {
@@ -165,6 +213,13 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 	}
 	// cudaDeviceReset();
 	// cudaProfilerStop();
+
+	cudaFree(scatteringMPsFlux);
+	// cudaFree(dev_scatteringMPs);
+
+	cudaUnbindTexture(scatteringPositions_tex);
+	cudaUnbindTexture(scatteringFlux_tex);
+	cudaUnbindTexture(scatteringR2_tex);
 	
 	return measureHIArray;
 }
