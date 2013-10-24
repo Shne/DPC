@@ -94,7 +94,7 @@ makeTeapotScene()
 
 	TriangleMesh * teapot = new TriangleMesh(teapotMaterial);
 	teapot->load("../teapot.obj");
-	teapot->setMpPerTri(40); //80
+	teapot->setMpPerTri(80); //80
 	teapot->setProp(1);
 	g_scene->addMeshTrianglesToScene(teapot);
 	
