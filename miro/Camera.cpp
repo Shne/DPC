@@ -66,7 +66,7 @@ Camera::click(Scene* pScene, Image* pImage)
         {
             pImage->clear(bgColor());
             // pScene->raytraceImage(this, g_image);
-            pScene->photonmapImage(this, g_image);
+            pScene->photonmapImage(this, g_image, 64);
             firstRayTrace = false;
         }
         

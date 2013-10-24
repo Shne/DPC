@@ -71,6 +71,8 @@
 int
 main(int argc, char*argv[])
 {
+	int blockSize = atoi(argv[1]);
+
 	// create a scene
 	// makeSpiralScene();
 	makeTeapotScene();
@@ -88,7 +90,7 @@ main(int argc, char*argv[])
 	// g_camera->setRenderer(Camera::RENDER_RAYTRACE);
 	// g_camera->click(g_scene, g_image);
 	g_image->clear(g_camera->bgColor());
-	g_scene->photonmapImage(g_camera, g_image);
+	g_scene->photonmapImage(g_camera, g_image, blockSize);
 	g_image->draw();
 
 	char str[1024];

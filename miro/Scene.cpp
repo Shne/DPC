@@ -113,7 +113,7 @@ Scene::srgbEncode(float c) {
 
 
 void
-Scene::photonmapImage(Camera *cam, Image *img) {
+Scene::photonmapImage(Camera *cam, Image *img, int blockSize) {
 	// uint w = img->width();
 	// uint h = img->height();
 	// float* result = kernel(w, h, NULL);
@@ -284,9 +284,9 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 
 	clock.start();
-	measureHIArray = finalPass(img->width(), img->height(), scatteringMPs, scatteringMPsSize, measureHIArray, translucentMaterialScale);
+	measureHIArray = finalPass(img->width(), img->height(), scatteringMPs, scatteringMPsSize, measureHIArray, translucentMaterialScale, blockSize);
 	
-	std::cout << "kernel call done!               " << clock.stop() << endl;
+	std::cout << "kernel call done!               " << clock.stop() << " blockSize=" << blockSize << endl;
 	clock.start();
 
 	for (int j = 0; j < img->height(); ++j) {

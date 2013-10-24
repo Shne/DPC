@@ -83,9 +83,9 @@ void handleError(cudaError_t err) {
 
 
 extern "C" __host__
-HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale) {
+HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale, int blockSize) {
 	//VARIABLES
-	dim3 dimBlock(768);
+	dim3 dimBlock(blockSize);
 	dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 	int sharedMemory = dimBlock.x*sizeof(Vector3);
 
