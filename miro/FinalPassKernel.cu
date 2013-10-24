@@ -32,13 +32,33 @@ void finalPassKernel(const int height, const int width, /*const HitInfo* dev_sca
 
 	// COMPUTE VALUES FOR MULTIPLE SCATTER
 	const float r2 = (hiP - scatteringP).length2();
-	const float dr = sqrtf(r2+zr*zr);
-	const float dv = sqrtf(r2+zv*zv);
-	const float C1 = zr * (sigmaTR + 1.0f/dr);
-	const float C2 = zv * (sigmaTR + 1.0f/dv);
-	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(powf(E,-sigmaTR*dr)/dr*dr) + C2*(powf(E,-sigmaTR*dv)/dv*dv));
-	const Vector3 MoP = Fdt * dMoOverAlphaPhi * scatteringFlux * scatteringR2 * PI;
 
+	// const float dr = sqrtf(r2+zr*zr);
+	// const float dv = sqrtf(r2+zv*zv);
+	// const float C1 = zr * (sigmaTR + 1.0f/dr);
+	// const float C2 = zv * (sigmaTR + 1.0f/dv);
+	// const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(powf(E,-sigmaTR*dr)/dr*dr) + C2*(powf(E,-sigmaTR*dv)/dv*dv));
+	// const Vector3 MoP = Fdt * dMoOverAlphaPhi * scatteringFlux * scatteringR2 * PI;
+
+	const float r2zr2 = r2 + zr*zr;
+	const float r2zv2 = r2 + zv*zv;
+	const Vector3 MoP = 
+		Fdt
+		*(
+			1.0f/(4.0f*PI) 
+			*(
+				zr * (sigmaTR + rsqrtf(r2zr2))
+				*(
+					powf(E,-sigmaTR*sqrtf(r2zr2))/(r2zr2)
+				)
+				+ 
+				zv * (sigmaTR + rsqrtf(r2zv2))
+				*(
+					powf(E,-sigmaTR*sqrtf(r2zv2))/(r2zv2)
+				)
+			)
+		)
+		* scatteringFlux * scatteringR2 * PI;
 
 	// SUM
 	int t = threadIdx.x;
