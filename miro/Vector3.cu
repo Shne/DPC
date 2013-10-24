@@ -24,6 +24,7 @@ class Vector3
 public:
     float x, y, z;      // The x & y & z coordinates.
 
+    HOST DEVICE
     Vector3() :
         x(0), y(0), z(0) {}
 
