@@ -41,8 +41,7 @@ void finalPassKernel(const int height, const int width, /*const HitInfo* dev_sca
 
 
 	// SUM
-	int t = threadIdx.x;
-	partialSum[t] = MoP;
+	partialSum[threadIdx.x] = MoP;
 	// Reduction (min/max/avr/sum), valid only when blockDim.x is a power of two:
 	int thread2;
 	int nTotalThreads = blockDim.x;	// Total number of active threads
