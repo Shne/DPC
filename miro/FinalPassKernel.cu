@@ -14,7 +14,7 @@ texture <float> scatteringR2_tex;
 
 
 __global__
-void finalPassKernel(const int height, const int width, /*const HitInfo* dev_scatteringMPs,*/ const int scatteringMPsSize, const Vector3 hiP, Vector3 *scatteringMPsFlux,
+void finalPassKernel(const int height, const int width, const int scatteringMPsSize, const Vector3 hiP, Vector3 *scatteringMPsFlux,
                      const float sigmaTR, const float Fdt, const float zr, const float zv) {
 	extern __shared__ Vector3 partialSum[];
 
@@ -43,15 +43,13 @@ void finalPassKernel(const int height, const int width, /*const HitInfo* dev_sca
 	// SUM
 	partialSum[threadIdx.x] = MoP;
 	// Reduction (min/max/avr/sum), valid only when blockDim.x is a power of two:
-	int thread2;
 	int nTotalThreads = blockDim.x;	// Total number of active threads
 	 
 	while(nTotalThreads > 1) {
-		int halfPoint = (nTotalThreads >> 1);	// divide by two
+		const int halfPoint = (nTotalThreads >> 1);	// divide by two
 		// only the first half of the threads will be active.
 		if (threadIdx.x < halfPoint) {
-			thread2 = threadIdx.x + halfPoint;
-			partialSum[threadIdx.x] += partialSum[thread2];
+			partialSum[threadIdx.x] += partialSum[threadIdx.x + halfPoint];
 		}
 		__syncthreads();
 		// Reducing the binary tree size by two:
@@ -59,12 +57,9 @@ void finalPassKernel(const int height, const int width, /*const HitInfo* dev_sca
 	}
 
 	// OUTPUT
-	__syncthreads();
 	if(threadIdx.x == 0) {
 		scatteringMPsFlux[blockIdx.x] = partialSum[0];
 	}
-	// scatteringMPsFlux[scatteringMPsIndex] = MoP;
-	// hi.flux += MoP;
 }
 
 
@@ -147,19 +142,18 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 			if(hi.material == NULL) continue;
 
 			//CALL KERNEL
-			finalPassKernel<<<dimGrid, dimBlock, sharedMemory>>>(height, width, /*dev_scatteringMPs,*/ scatteringMPsSize, hi.P, scatteringMPsFlux, sigmaTR, Fdt, zr, zv);
+			finalPassKernel<<<dimGrid, dimBlock, sharedMemory>>>(height, width, scatteringMPsSize, hi.P, scatteringMPsFlux, sigmaTR, Fdt, zr, zv);
 			handleError( cudaGetLastError() );
 
 			//RETURN DATA
 			handleError( cudaMemcpy(perPixelFlux, scatteringMPsFlux, dimGrid.x*sizeof(Vector3), cudaMemcpyDeviceToHost) );
 
 			//SUM DATA
-			Vector3 flux;
+			Vector3 flux = Vector3(0.0f);
 			for(int _i = 0; _i < dimGrid.x; _i++) {
 				flux += perPixelFlux[_i];
 			}
 			measureHIArray[j*width+i].flux += flux;
-			// measureHIArray[j*width+i].flux = scatteringMPsFlux[0];
 		}
 		//REPORT PROGRESS
 		printf("Kernel Progress: %.3f%%\r", (j)/float(height) *100.0f);
