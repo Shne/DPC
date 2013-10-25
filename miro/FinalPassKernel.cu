@@ -8,12 +8,12 @@ using namespace std;
 
 
 __global__
-void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, const HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux, const float translucentMaterialScale) {
+void finalPassKernel(const int height, const int width, const HitInfo* dev_scatteringMPs, const int scatteringMPsSize, HitInfo* hiArray, const int hiIndex, Vector3 *scatteringMPsFlux, const float translucentMaterialScale) {
 	
 	// int i = blockIdx.x*blockDim.x + threadIdx.x;
 	// int j = blockIdx.y*blockDim.y + threadIdx.y;
 	// HitInfo* hi = dev_eyeMPs[j*width + i];
-	const HitInfo hi = hiArray[hiIndex];
+	HitInfo hi = hiArray[hiIndex];
 
 	// if(hi == NULL) return;
 
@@ -65,8 +65,8 @@ void finalPassKernel(const int height, const int width, const HitInfo* dev_scatt
 	const float dMoOverAlphaPhi = 1.0f/(4.0f*PI) * (C1*(pow(E,-sigmaTR*dr)/dr*dr) + C2*(pow(E,-sigmaTR*dv)/dv*dv));
 	const Vector3 MoP = Fdt * dMoOverAlphaPhi * sHI.flux * sHI.r2 * PI;
 
-	scatteringMPsFlux[scatteringMPsIndex] = MoP;
-	// hi.flux += MoP;
+	//scatteringMPsFlux[scatteringMPsIndex] = MoP;
+	hiArray[hiIndex].flux += MoP;
 
 
 	
@@ -113,15 +113,15 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 				exit(1);
 			}
 			// cout << "after kernel" << endl;
-			cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
-			Vector3 flux;
-			for(int _i = 0; _i < scatteringMPsSize; _i++) {
-				flux += perPixelFlux[_i];
+			//cudaMemcpy(perPixelFlux, scatteringMPsFlux, scatteringMPsSize*sizeof(Vector3), cudaMemcpyDeviceToHost );
+			//Vector3 flux;
+			//for(int _i = 0; _i < scatteringMPsSize; _i++) {
+			//	flux += perPixelFlux[_i];
 				// std::cout << perPixelFlux[_i];
-			}
+			//}
 			// cout << "after sum" << endl;
 			// cout << measureHIArray[j*width+i].flux << " ";
-			measureHIArray[j*width+i].flux = flux;
+			//measureHIArray[j*width+i].flux = flux;
 			// cout << measureHIArray[j*width+i].flux << endl;
 
 			// Check for errors
@@ -138,7 +138,7 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 
 
 	// HitInfo* result = new HitInfo[width*height];
-	// cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
+	cudaMemcpy(measureHIArray, dev_eyeMPs, width*height*sizeof(HitInfo), cudaMemcpyDeviceToHost );
 	
 	
 

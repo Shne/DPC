@@ -97,6 +97,7 @@ main(int argc, char*argv[])
 
 	// MiroWindow miro(&argc, argv);
 	// miro.mainLoop();
+	cudaDeviceReset();
 
 	return 0; // never executed
 }
