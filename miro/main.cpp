@@ -73,8 +73,8 @@ main(int argc, char*argv[])
 {
 	// create a scene
 	// makeSpiralScene();
-	// makeTeapotScene();
-	makeDragonSmoothScene();
+	makeTeapotScene();
+	// makeDragonSmoothScene();
 	// makeSphereScene();
 	// makeSphereSmoothScene();
 	// makeTeapotHiResScene();
