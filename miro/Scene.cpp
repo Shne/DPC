@@ -223,27 +223,27 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 			HitInfo photonHI;
 			if(trace(photonHI, r)) {
 
-				std::list<HitInfo*> hiList = eye_mp_hg.lookup(photonHI.P);
+				// std::list<HitInfo*> hiList = eye_mp_hg.lookup(photonHI.P);
 				
-				for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); hiIter++) {
-					HitInfo* measureHI = (*hiIter);
+				// for(std::list<HitInfo*>::iterator hiIter = hiList.begin(); hiIter != hiList.end(); hiIter++) {
+				// 	HitInfo* measureHI = (*hiIter);
 
-					if(measureHI == 0) continue;
-					// if(measureHI->material == m_envMapMaterial) continue;
+				// 	if(measureHI == 0) continue;
+				// 	// if(measureHI->material == m_envMapMaterial) continue;
 
-					float distance2 = (measureHI->P - photonHI.P).length2();
-					// std::cout << (*hiIter) << std::endl;
-					// std::cout << "eye dist, r2: " << distance2 << " " << measureHI->r2 << std::endl;
+				// 	float distance2 = (measureHI->P - photonHI.P).length2();
+				// 	// std::cout << (*hiIter) << std::endl;
+				// 	// std::cout << "eye dist, r2: " << distance2 << " " << measureHI->r2 << std::endl;
 					
-					if(distance2 < measureHI->r2) {
-						// std::cout << "EYE" << std::endl;
-						float g = (measureHI->photons*ALPHA+ALPHA) 
-								   / (measureHI->photons*ALPHA+1.0);
-						measureHI->r2 = measureHI->r2*g;
-						measureHI->photons++;
-						measureHI->flux += flux * (1./PI) * g;
-					}
-				}
+				// 	if(distance2 < measureHI->r2) {
+				// 		// std::cout << "EYE" << std::endl;
+				// 		float g = (measureHI->photons*ALPHA+ALPHA) 
+				// 				   / (measureHI->photons*ALPHA+1.0);
+				// 		measureHI->r2 = measureHI->r2*g;
+				// 		measureHI->photons++;
+				// 		measureHI->flux += flux * (1./PI) * g;
+				// 	}
+				// }
 
 				std::list<HitInfo*> scatteringHiList = scatteringMPs_hg.lookup(photonHI.P);
 				// if(scatteringHiList.size() > 1) {cout << "MIGHT CRASH" << scatteringHiList.size() << endl;}
