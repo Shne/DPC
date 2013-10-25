@@ -60,13 +60,13 @@ makeTeapotScene()
 	PointLight * light = new PointLight;
 	// light->setPosition(Vector3(10, 10, 10));
 	// light->setPosition(Vector3(-5, 6, 1));
-	light->setPosition(Vector3(0.0, 4.0, -1.2)); //(-180, 320, 220)
+	light->setPosition(Vector3(0.0, 4.0, -1.5)); //(-180, 320, 220)
 	light->setColor(Vector3(1.0f, 1.0f, 1.0f));
 	light->setWattage(700);
 	g_scene->addLight(light);
 
 	g_scene->setInitialHitPointRadius(0.08f); //was 0.08
-	g_scene->setPhotonsPerLight(pow(2,19));
+	g_scene->setPhotonsPerLight(pow(2,20));
 	g_scene->setTranslucentMaterialScale(40); //before area scaling, this was 40
 	g_scene->setScatterHitpointRadius(0.08f); //previously 0.08 //default is 0.1
 

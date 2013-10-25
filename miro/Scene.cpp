@@ -199,7 +199,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 		// m_hashGrids.push_back(scatteringMPs_hg);
 	}
 	
-	std::cout << "Object pass done!                " << clock.stop() << std::endl;
+	std::cout << "Object pass done!               " << clock.stop() << std::endl;
 
 
 
