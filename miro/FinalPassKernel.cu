@@ -158,7 +158,7 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 			for(int _i = 0; _i < dimGrid.x; _i++) {
 				flux += perPixelFlux[_i];
 			}
-			measureHIArray[j*width+i].flux = flux;
+			measureHIArray[j*width+i].flux += flux;
 			// measureHIArray[j*width+i].flux = scatteringMPsFlux[0];
 		}
 		//REPORT PROGRESS
