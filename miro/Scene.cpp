@@ -310,7 +310,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 			Vector3 shadeResult;
 			if(hi.material == NULL) {
-				shadeResult = Vector3(0.0f, 0.0f, 0.0f);
+				shadeResult = cam->bgColor();
 			} else {
 				// std::cout << "Material:" << hi.material;
 				// std::cout << " flux:" << hi.flux;
