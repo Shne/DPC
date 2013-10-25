@@ -42,6 +42,7 @@ void finalPassKernel(const int height, const int width, const int scatteringMPsS
 
 	// SUM
 	partialSum[threadIdx.x] = MoP;
+	__syncthreads();
 	// Reduction (min/max/avr/sum), valid only when blockDim.x is a power of two:
 	int nTotalThreads = blockDim.x;	// Total number of active threads
 	 
