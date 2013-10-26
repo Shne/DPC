@@ -176,7 +176,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 	std::cout << "Eye pass done!                  " << clock.stop() << "\n";
 	
 
-
+	clock.start();
 	// OBJECT PASS, distributing more irradiance samples across translucent objects
 	// to be used in calculating the BSSRDF in the final pass.
 	HashGrid scatteringMPs_hg;
@@ -199,7 +199,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 		// m_hashGrids.push_back(scatteringMPs_hg);
 	}
 	
-
+	std::cout << "Object pass done!               " << clock.stop() << std::endl;
 
 
 
@@ -310,7 +310,7 @@ Scene::photonmapImage(Camera *cam, Image *img) {
 
 			Vector3 shadeResult;
 			if(hi.material == NULL) {
-				shadeResult = Vector3(0.0f, 0.0f, 0.0f);
+				shadeResult = cam->bgColor();
 			} else {
 				// std::cout << "Material:" << hi.material;
 				// std::cout << " flux:" << hi.flux;
