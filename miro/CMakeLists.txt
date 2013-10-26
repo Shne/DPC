@@ -9,7 +9,7 @@ find_package(CUDA 4.1 REQUIRED)
 # Compile kernels for shader models 1.0 and 2.0 as default
 set(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=\"sm_10,compute_10\" -gencode=arch=compute_20,code=\"sm_20,compute_20\" -G -g -use_fast_math")
 
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -Wno-deprecated")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -Wno-deprecated -use_fast_math")
 SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O3")
 
 find_package(OpenGL REQUIRED)

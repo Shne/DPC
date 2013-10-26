@@ -54,7 +54,7 @@ void handleError(cudaError_t err) {
 extern "C" __host__
 HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringMPs, const int scatteringMPsSize, HitInfo* measureHIArray, const float translucentMaterialScale) {
 	//VARIABLES
-	dim3 dimBlock(64);
+	dim3 dimBlock(256);
 	dim3 dimGrid = scatteringMPsSize/dimBlock.x;
 	// int sharedMemory = dimBlock.x*sizeof(Vector3);
 
@@ -128,7 +128,7 @@ HitInfo* finalPass(const int width, const int height, const HitInfo* scatteringM
 			for(int _i = 0; _i < scatteringMPsSize; _i++) {
 				flux += perPixelFlux[_i];
 			}
-			measureHIArray[j*width+i].flux = flux;
+			measureHIArray[j*width+i].flux += flux;
 		}
 		//REPORT PROGRESS
 		printf("Kernel Progress: %.3f%%\r", (j)/float(height) *100.0f);
